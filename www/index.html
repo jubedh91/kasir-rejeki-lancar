@@ -43,14 +43,13 @@ label{display:block;margin:12px 0 4px;font-size:13px;color:var(--mt)}
 </style>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head><body>
-<div id="top"><button id="bk">←</button><b id="tt"></b><span id="ac"></span></div>
-<div id="app"></div>
+<div id="top"><button id="bk" style="visibility:hidden">←</button><b id="tt">Kasir Rejeki Lancar</b><span id="ac"></span></div>
+<div id="app"><p class="em" style="margin-top:60px">Memuat sistem kasir...</p></div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getFirestore,collection,doc,onSnapshot,setDoc,getDoc,updateDoc,deleteDoc,runTransaction,query,orderBy,where,limit}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import{getAuth,signInAnonymously}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Konfigurasi resmi proyek Firebase Anda
 const firebaseConfig = {
   apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKOqSo",
   authDomain: "pos-rejeki-lancar.firebaseapp.com",
@@ -80,16 +79,17 @@ async function compress(file){
  let q=.7,b;for(;;){b=await new Promise(r=>c.toBlob(r,'image/webp',q));if(b.size<40960||q<=.2)break;q=+(q-.1).toFixed(1)}
  return b}
 
-// Ubah Blob ke DataURL/Base64 untuk disimpan langsung di Firestore (hemat kuota)
 function blobToDataUrl(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)})}
 
 // ---------- Modal form generik & scanner ----------
 function form(title,fields,ok='Simpan'){return new Promise(r=>{
  const m=document.createElement('div');m.className='modal';
- m.innerHTML=`<div class=sheet><h3 style="margin:0">${title}</h3>${fields.map(f=>`<label>${f.l}</label>${f.o?`<select class=pill name=${f.k}>${f.o.map(o=>`<option>${o}</option>`)}</select>`:`<input class=pill name=${f.k} type=${f.t||'text'} value="${esc(f.v??'')}" ${f.t=='number'?'inputmode=numeric':''}>`)}<div class=row><button class=sec>Batal</button><button class=main2>${ok}</button></div></div>`;
+ const fHtml=fields.map(f=>`<label>${f.l}</label>${f.o?`<select class=pill name=${f.k}>${f.o.map(o=>`<option>${o}</option>`).join('')}</select>`:`<input class=pill name=${f.k} type=${f.t||'text'} value="${esc(f.v??'')}" ${f.t=='number'?'inputmode=numeric':''}>`}`).join('');
+ m.innerHTML=`<div class=sheet><h3 style="margin:0">${title}</h3>${fHtml}<div class=row><button class=sec>Batal</button><button class=main2>${ok}</button></div></div>`;
  document.body.append(m);
  m.querySelector('.sec').onclick=()=>{m.remove();r(null)};
  m.querySelector('.main2').onclick=()=>{const o={};m.querySelectorAll('[name]').forEach(e=>o[e.name]=e.value);m.remove();r(o)}})}
+
 function scan(cb){
  const m=document.createElement('div');m.className='modal';m.innerHTML='<div class=sheet><div id=rd></div><div class=row><button class=sec>Tutup</button></div></div>';document.body.append(m);
  const q=new Html5Qrcode('rd'),x=()=>q.stop().catch(()=>{}).finally(()=>m.remove());
@@ -105,7 +105,6 @@ function rcpt(tx,w=32){
  L('TOTAL',rp(tx.total_final)),L('Bayar ('+tx.payment_type+')',rp(tx.amount_paid)),
  tx.is_debt?L('Sisa kasbon',rp(tx.total_final-tx.amount_paid)):L('Kembali',rp(tx.change)),d,c('Terima kasih')].filter(x=>x!=='').join('\n')}
 
-// Cetak langsung lewat RawBT Intent tanpa blokir WebView
 function printBT(tx){
  try {
   const text = rcpt(tx, 32) + '\n\n\n\n';
@@ -151,18 +150,23 @@ async function checkout(v){
 
 // ---------- Layar ----------
 const V={
-login:{t:'Masuk',
- draw:()=>`<div class=pad><h2 style="margin:36px 0 2px;color:var(--g)">Kasir POS</h2><label>Nama kasir</label><input class=pill id=un><label>PIN</label><input class=pill id=pn type=password inputmode=numeric></div><div class=bar><button class=main id=lg>Masuk</button></div>`,
- init(){$('#lg').onclick=async()=>{const h=await sha($('#pn').value),s=(await getDoc(doc(db,'settings','pins'))).data()||{};
-  if(h==s.owner)S.role='owner';else if(h==s.cashier)S.role='kasir';else return toast('PIN salah');
-  S.name=$('#un').value.trim()||(S.role=='owner'?'Owner':'Kasir');S.stack=[];cur=null;go('home')}}},
-home:{t:'Menu',
+login:{t:'Masuk Kasir',
+ draw:()=>`<div class=pad><h2 style="margin:36px 0 2px;color:var(--g)">Kasir Rejeki Lancar</h2><label>Nama kasir</label><input class=pill id=un placeholder="Misal: Kasir 1"><label>PIN Masuk</label><input class=pill id=pn type=password inputmode=numeric placeholder="Owner: 1234 | Kasir: 0000"></div><div class=bar><button class=main id=lg>Masuk</button></div>`,
+ init(){$('#lg').onclick=async()=>{
+  const pin=$('#pn').value.trim();if(!pin)return toast('Masukkan PIN terlebih dahulu');
+  const h=await sha(pin);
+  try{
+   const s=(await getDoc(doc(db,'settings','pins'))).data()||{};
+   if(h==s.owner)S.role='owner';else if(h==s.cashier)S.role='kasir';else return toast('PIN salah');
+   S.name=$('#un').value.trim()||(S.role=='owner'?'Owner':'Kasir');S.stack=[];cur=null;go('home')
+  }catch(err){toast('Gagal autentikasi: '+err.message)}}}},
+home:{t:'Menu Utama',
  draw:()=>{const m=[['🛒','Kasir','pos'],['🏷','Kasbon','debts'],['⏱','Shift & Kas','shift'],...(S.role=='owner'?[['📦','Barang','items'],['📊','Laporan','report'],['🔑','Ganti PIN','pin']]:[]),['🚪','Keluar','out']];
-  return`<div class=pad><p style="margin:0 0 12px;color:var(--mt)">${esc(S.name)} · ${S.role=='owner'?'Owner':'Kasir'}</p><div class=grid>${m.map(x=>`<button class=tile data-g=${x[2]}><span>${x[0]}</span>${x[1]}</button>`).join('')}</div></div>`},
+  return`<div class=pad><p style="margin:0 0 12px;color:var(--mt)">${esc(S.name)} · <b>${S.role=='owner'?'Owner':'Kasir'}</b></p><div class=grid>${m.map(x=>`<button class=tile data-g=${x[2]}><span>${x[0]}</span>${x[1]}</button>`).join('')}</div></div>`},
  init(){$('#app').onclick=async e=>{const g=e.target.closest('[data-g]')?.dataset.g;if(!g)return;
   if(g=='out'){S.role=null;S.cart=[];S.stack=[];cur=null;return go('login')}
   if(g=='pin'){const v=await form('Ganti PIN',[{k:'o',l:'PIN Owner baru (kosong = tetap)',t:'password'},{k:'c',l:'PIN Kasir baru (kosong = tetap)',t:'password'}]);if(!v)return;
-   const o={};if(v.o)o.owner=await sha(v.o);if(v.c)o.cashier=await sha(v.c);await setDoc(doc(db,'settings','pins'),o,{merge:true});return toast('PIN diperbarui')}
+   const o={};if(v.o)o.owner=await sha(v.o);if(v.c)o.cashier=await sha(v.c);await setDoc(doc(db,'settings','pins'),o,{merge:true});return toast('PIN berhasil diperbarui')}
   go(g)}}},
 pos:{t:'Kasir Penjualan',
  draw:()=>`<div class=pad><div class=row><input class=pill id=q placeholder="Cari nama / scan kode"><button class=ic id=sc>▥</button></div>
@@ -211,7 +215,7 @@ edit:{t:'Edit Barang',own:1,
   ${E.id?'<button id=dp class=neg style="margin-top:22px">Hapus barang</button>':''}</div><div class=bar><button class=main id=sv>Simpan</button></div>`},
  init(){
   const units=()=>{$('#ut').innerHTML='<div class=ur><small>Satuan</small><small>Isi</small><small>Ecer</small><small>Grosir</small><small>Member</small><span></span></div>'+E.units.map((u,i)=>`<div class=ur><input data-i=${i} data-k=name value="${esc(u.name)}" ${i?'':'placeholder=terkecil'}><input data-i=${i} data-k=multiplier type=number inputmode=numeric value=${u.multiplier} ${i?'':'readonly'}>${T.map(t=>`<input data-i=${i} data-k=${t} inputmode=numeric value="${u.prices[t]?rp(u.prices[t]):''}">`).join('')}${i?`<button data-x=${i}>✕</button>`:'<span></span>'}</div>`).join('')};
-  units();window._units=units;
+  units();
   $('#ut').oninput=e=>{const t=e.target,u=E.units[t.dataset.i],k=t.dataset.k;if(!u)return;
    if(k=='name')u.name=t.value;else if(k=='multiplier')u.multiplier=Math.max(1,+t.value||1);else{const n=dg(t.value);t.value=n?rp(n):'';u.prices[k]=n}};
   $('#ut').onclick=e=>{const x=e.target.dataset.x;if(x){E.units.splice(+x,1);units()}};
@@ -260,7 +264,7 @@ shift:{t:'Shift & Kas',
    <div class=row style="margin-top:18px"><button class=sec data-a=exp>Catat Pengeluaran</button><button class=main2 data-a=close>Tutup Shift</button></div>`+
    S.exps.filter(e=>e.timestamp>=s.start_time).map(e=>`<div class=kv><span>${esc(e.category)} ${esc(e.note||'')}</span><b class=neg>${rp(e.amount)}</b></div>`).join('')}
   $('#sb').innerHTML=h}},
-report:{t:'Laporan',own:1,
+report:{t:'Laporan Toko',own:1,
  draw:()=>`<div class=pad><div class=tabs id=rg>${[[1,'Hari ini'],[7,'7 hari'],[30,'30 hari'],[0,'Semua']].map(([d,l])=>`<button data-d=${d}>${l}</button>`).join('')}</div><div id=rb></div></div>`,
  init(){R=1;$('#rg').onclick=e=>{if(e.target.dataset.d!=null){R=+e.target.dataset.d;V.report.upd()}}},
  upd(){
@@ -280,7 +284,8 @@ report:{t:'Laporan',own:1,
 
 // ---------- Navigasi ----------
 function go(n,a,push=true){
- const v=V[n];if(v.own&&S.role!='owner')return toast('Khusus Owner');
+ const v=V[n];if(!v)return;
+ if(v.own&&S.role!='owner')return toast('Khusus Owner');
  if(push&&cur)S.stack.push([cur,curA]);cur=n;curA=a;
  $('#tt').textContent=v.t;$('#bk').style.visibility=S.stack.length?'visible':'hidden';
  $('#app').innerHTML=v.draw(a);$('#ac').innerHTML=v.act?`<button id=ab>${v.act[0]}</button>`:'';if(v.act)$('#ab').onclick=v.act[1];
@@ -297,10 +302,26 @@ function listen(){
  onSnapshot(query(col('expenses'),orderBy('timestamp','desc'),limit(300)),s=>{S.exps=s.docs.map(d=>d.data());render()});
  onSnapshot(query(col('shifts'),where('status','==','open')),s=>{S.shift=s.docs[0]?.data()||null;render()})}
 
+// Gambar layar login secara instan
+go('login',null,false);
+
+// Sambungkan ke Firebase
 (async()=>{
- try{await signInAnonymously(au);
+ try{
+  await signInAnonymously(au);
   const pr=doc(db,'settings','pins');
-  if(!(await getDoc(pr)).exists()){await setDoc(pr,{owner:await sha('1234'),cashier:await sha('0000')});toast('PIN awal: Owner 1234, Kasir 0000. Segera ganti!')}
-  listen();go('login',null,false)}
- catch(e){$('#app').innerHTML='<p class=em>Gagal terhubung ke Firebase:<br>'+esc(e.message)+'<br>Periksa firebaseConfig, Anonymous Auth, dan Firestore rules.</p>'}})();
+  const snap=await getDoc(pr);
+  if(!snap.exists()){
+   await setDoc(pr,{owner:await sha('1234'),cashier:await sha('0000')});
+   toast('PIN awal: Owner 1234, Kasir 0000');
+  }
+  listen();
+ }catch(e){
+  toast('Koneksi database: '+e.message);
+  const errDiv=document.createElement('div');
+  errDiv.className='pad';
+  errDiv.innerHTML='<p class="em neg">Gagal terhubung ke Firebase:<br>'+esc(e.message)+'<br><br>Periksa internet dan status Anonymous Auth di Firebase.</p>';
+  document.body.prepend(errDiv);
+ }
+})();
 </script></body></html>
