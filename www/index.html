@@ -74,7 +74,7 @@
   </div>
   <div id="app"></div>
 
-  <!-- SCRIPT 1: LOGIKA APLIKASI & ANTARMUKA PENGGUNA (BERJALAN INSTAN) -->
+  <!-- SCRIPT 1: LOGIKA ANTARMUKA & FITUR OFFLINE/RAWBT -->
   <script>
     const $ = s => document.querySelector(s);
     const rp = n => 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
@@ -86,7 +86,7 @@
     const S = { role: null, name: '', prods: [], txs: [], debts: [], exps: [], shift: null, cart: [], tier: 'eceran', stack: [] };
     let cur = null, curA = null, E = null, FILE = null, DELIMG = false, R = 1;
     const up = (p, u, t) => p.units[u]?.prices?.[t] || p.units[u]?.prices?.eceran || 0;
-    
+
     async function sha(s) {
       const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
       return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
@@ -146,6 +146,36 @@
           r(o);
         };
       });
+    }
+
+    async function scan(cb) {
+      if (!window.Html5Qrcode) {
+        toast('Mempersiapkan scanner...');
+        try {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
+            s.onload = res;
+            s.onerror = () => rej(new Error('Gagal memuat modul kamera'));
+            document.head.appendChild(s);
+          });
+        } catch (e) {
+          return toast(e.message);
+        }
+      }
+      const m = document.createElement('div');
+      m.className = 'modal';
+      m.innerHTML = '<div class="sheet"><div id="rd" style="width:100%"></div><div class="row"><button class="sec">Tutup</button></div></div>';
+      document.body.append(m);
+      try {
+        const q = new Html5Qrcode('rd');
+        const x = () => q.stop().catch(() => {}).finally(() => m.remove());
+        m.querySelector('button').onclick = x;
+        await q.start({ facingMode: 'environment' }, { fps: 10, qrbox: 240 }, t => { x(); cb(t); });
+      } catch (e) {
+        toast('Kamera: ' + e.message);
+        m.remove();
+      }
     }
 
     function rcpt(tx, w = 32) {
@@ -213,11 +243,10 @@
       m.querySelector('#r3').onclick = () => m.remove();
     }
 
-    // Layar & Tampilan
     const V = {
       login: {
         t: 'Masuk Kasir',
-        draw: () => '<div class="pad"><h2 style="margin:36px 0 2px;color:var(--g)">Kasir Rejeki Lancar</h2><label>Nama kasir</label><input class="pill" id="un" placeholder="Misal: Kasir 1"><label>PIN Masuk</label><input class="pill" id="pn" type="password" inputmode="numeric" placeholder="Owner: 1234 | Kasir: 0000"></div><div class="bar"><button class="main" id="lg">Masuk</button></div>',
+        draw: () => '<div class="pad"><h2 style="margin:36px 0 2px;color:var(--g)">Kasir Rejeki Lancar</h2><label>Nama kasir</label><input class="pill" id="un" placeholder="Misal: Kasir 1"><label>PIN Masuk</label><input class="pill" id="pn" type="password" inputmode="numeric" placeholder="Masukkan PIN"></div><div class="bar"><button class="main" id="lg">Masuk</button></div>',
         init() {
           $('#lg').onclick = async () => {
             if (!window.FB_READY) return toast('Sedang menyambungkan cloud...');
@@ -263,7 +292,7 @@
       },
       pos: {
         t: 'Kasir Penjualan',
-        draw: () => '<div class="pad"><div class="row"><input class="pill" id="q" placeholder="Cari nama barang"><button class="ic" id="sc">&#9635;</button></div><div class="tabs" id="tr">' + T.map(t => '<button data-t="' + t + '">' + t + '</button>').join('') + '</div><div id="pl"></div><h4 style="margin:18px 0 0">Keranjang</h4><div id="cl"></div></div><div class="bar"><button class="main" id="pay"></button></div>',
+        draw: () => '<div class="pad"><div class="row"><input class="pill" id="q" placeholder="Cari nama / scan kode"><button class="ic" id="sc">&#9635;</button></div><div class="tabs" id="tr">' + T.map(t => '<button data-t="' + t + '">' + t + '</button>').join('') + '</div><div id="pl"></div><h4 style="margin:18px 0 0">Keranjang</h4><div id="cl"></div></div><div class="bar"><button class="main" id="pay"></button></div>',
         init() {
           const add = p => {
             const l = S.cart.find(c => c.pid === p.id && c.u === 0);
@@ -271,7 +300,16 @@
             V.pos.upd();
           };
           $('#q').oninput = () => V.pos.upd();
-          $('#sc').onclick = () => toast('Scanner barcode aktif di mode fisik/kamera');
+          $('#q').onkeydown = e => {
+            if (e.key === 'Enter') {
+              const p = S.prods.find(x => x.code && x.code === $('#q').value.trim());
+              if (p) { add(p); $('#q').value = ''; V.pos.upd(); }
+            }
+          };
+          $('#sc').onclick = () => scan(t => {
+            const p = S.prods.find(x => x.code === t);
+            p ? add(p) : toast('Kode ' + t + ' tidak ditemukan');
+          });
           $('#tr').onclick = e => { if (e.target.dataset.t) { S.tier = e.target.dataset.t; V.pos.upd(); } };
           $('#pl').onclick = e => {
             const id = e.target.closest('[data-p]')?.dataset.p;
@@ -352,7 +390,7 @@
         draw(id) {
           FILE = null; DELIMG = false;
           E = structuredClone(S.prods.find(p => p.id === id) || NEW());
-          return '<div class="pad"><div class="photo"><img id="im" src="' + (E.image_url || PH) + '"><div class="row"><button class="ic" id="gal">&#128444;</button><button class="ic" id="del">&#128465;</button></div></div><input type="file" id="f2" accept="image/*" hidden><label>Nama barang</label><input class="pill" id="nm" value="' + esc(E.name) + '"><label>Kode / barcode</label><input class="pill" id="cd" value="' + esc(E.code) + '"><label>Kategori</label><input class="pill" id="ct" value="' + esc(E.category) + '"><label>Stok (satuan terkecil)</label><input class="pill" id="sk" type="number" inputmode="numeric" value="' + E.stock_base + '"><label>Stok minimum alert</label><input class="pill" id="ms" type="number" inputmode="numeric" value="' + E.min_stock_alert + '"><label>HPP / Harga modal beli</label><input class="pill" id="hb" inputmode="numeric" value="' + rp(E.last_buy_price) + '"><div class="card"><div class="row"><b class="sp">Data Satuan</b><button class="ic" id="ua">+</button><button class="ic" id="ud">&#128465;</button></div><div id="ut"></div></div><label class="ck"><input type="checkbox" id="cp" ' + (E.show_in_pos ? 'checked' : '') + '><i></i>Tampilkan di Transaksi</label><label class="ck"><input type="checkbox" id="cs" ' + (E.use_stock ? 'checked' : '') + '><i></i>Pakai stok</label>' + (E.id ? '<button id="dp" class="neg" style="margin-top:22px">Hapus barang</button>' : '') + '</div><div class="bar"><button class="main" id="sv">Simpan</button></div>';
+          return '<div class="pad"><div class="photo"><img id="im" src="' + (E.image_url || PH) + '"><div class="row"><button class="ic" id="cam">&#128247;</button><button class="ic" id="gal">&#128444;</button><button class="ic" id="del">&#128465;</button></div></div><input type="file" id="f1" accept="image/*" capture="environment" hidden><input type="file" id="f2" accept="image/*" hidden><label>Nama barang</label><input class="pill" id="nm" value="' + esc(E.name) + '"><label>Kode / barcode</label><div class="iw"><input class="pill" id="cd" value="' + esc(E.code) + '"><button class="ic" id="bc">&#9635;</button></div><label>Kategori</label><input class="pill" id="ct" value="' + esc(E.category) + '"><label>Stok (satuan terkecil)</label><input class="pill" id="sk" type="number" inputmode="numeric" value="' + E.stock_base + '"><label>Stok minimum alert</label><input class="pill" id="ms" type="number" inputmode="numeric" value="' + E.min_stock_alert + '"><label>HPP / Harga modal beli</label><input class="pill" id="hb" inputmode="numeric" value="' + rp(E.last_buy_price) + '"><div class="card"><div class="row"><b class="sp">Data Satuan</b><button class="ic" id="ua">+</button><button class="ic" id="ud">&#128465;</button></div><div id="ut"></div></div><label class="ck"><input type="checkbox" id="cp" ' + (E.show_in_pos ? 'checked' : '') + '><i></i>Tampilkan di Transaksi</label><label class="ck"><input type="checkbox" id="cs" ' + (E.use_stock ? 'checked' : '') + '><i></i>Pakai stok</label>' + (E.id ? '<button id="dp" class="neg" style="margin-top:22px">Hapus barang</button>' : '') + '</div><div class="bar"><button class="main" id="sv">Simpan</button></div>';
         },
         init() {
           const units = () => {
@@ -370,8 +408,11 @@
           $('#ua').onclick = () => { E.units.push({ name: '', multiplier: 10, prices: { eceran: 0, grosir: 0, member: 0 } }); units(); };
           $('#ud').onclick = () => { if (E.units.length > 1) { E.units.pop(); units(); } };
           $('#hb').oninput = e => { const n = dg(e.target.value); e.target.value = n ? rp(n) : ''; };
+          $('#bc').onclick = () => scan(t => { $('#cd').value = t; });
+          $('#cam').onclick = () => $('#f1').click();
           $('#gal').onclick = () => $('#f2').click();
-          $('#f2').onchange = async e => {
+
+          const pick = async e => {
             const f = e.target.files[0];
             if (!f) return;
             try {
@@ -383,7 +424,10 @@
               toast('Gagal memproses foto');
             }
           };
+          $('#f1').onchange = pick;
+          $('#f2').onchange = pick;
           $('#del').onclick = () => { FILE = null; DELIMG = true; E.image_url = ''; $('#im').src = PH; };
+
           if ($('#dp')) $('#dp').onclick = async () => {
             if (confirm('Hapus barang ini?')) { await window.FB_API.deleteProduct(E.id); back(); }
           };
@@ -528,23 +572,24 @@
     $('#bk').onclick = back;
     const render = () => { if (cur !== 'edit') V[cur]?.upd?.(); };
 
-    // Tampilkan form login di detik ke-0
+    // Tampilkan form login di detik pertama
     go('login', null, false);
   </script>
 
-  <!-- SCRIPT 2: KONEKSI MODULAR GOOGLE FIREBASE -->
+  <!-- SCRIPT 2: KONEKSI DATABASE FIREBASE CLOUD -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, doc, onSnapshot, setDoc, getDoc, updateDoc, deleteDoc, runTransaction, query, orderBy, where, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKOqSo",
+      apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKoQSo",
       authDomain: "pos-rejeki-lancar.firebaseapp.com",
       projectId: "pos-rejeki-lancar",
       storageBucket: "pos-rejeki-lancar.firebasestorage.app",
       messagingSenderId: "647198272530",
-      appId: "1:647198272530:web:60730b6c34d46449bafccb"
+      appId: "1:647198272530:web:60730b6c34d46449bafccb",
+      measurementId: "G-P7YN1ZJQEJ"
     };
 
     try {
@@ -554,14 +599,12 @@
 
       await signInAnonymously(au);
 
-      // Inisialisasi PIN pertama kali jika kosong
       const pr = doc(db, 'settings', 'pins');
       const snap = await getDoc(pr);
       if (!snap.exists()) {
         await setDoc(pr, { owner: await sha('1234'), cashier: await sha('0000') });
       }
 
-      // API Database untuk Script 1
       window.FB_API = {
         getPins: async () => (await getDoc(doc(db, 'settings', 'pins'))).data(),
         savePins: async (o) => setDoc(doc(db, 'settings', 'pins'), o, { merge: true }),
@@ -642,7 +685,6 @@
         }
       };
 
-      // Realtime listener
       onSnapshot(collection(db, 'products'), s => { S.prods = s.docs.map(d => d.data()).sort((a, b) => a.name.localeCompare(b.name)); render(); });
       onSnapshot(query(collection(db, 'transactions'), orderBy('timestamp', 'desc'), limit(500)), s => { S.txs = s.docs.map(d => d.data()); render(); });
       onSnapshot(collection(db, 'debts'), s => { S.debts = s.docs.map(d => d.data()); render(); });
