@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Kasir Rejeki Lancar</title>
+  <style>
+    :root {
+      --primary-green: #00a86b;
+      --border-color: #dcdfe6;
+      --text-main: #2c3e50;
+      --text-muted: #909399;
+      --bg-gray: #f8f9fa;
+      --danger: #f56c6c;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; background: #ffffff; color: var(--text-main); padding-bottom: 90px; }
+    .hidden { display: none !important; }
+
+    /* Top Navigation */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 10;
+    }
+    .top-bar h1 { font-size: 17px; margin: 0; font-weight: 600; }
+    .top-bar .nav-toggle {
+      background: #e8f7f0;
+      color: var(--primary-green);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .form-container { padding: 16px; max-width: 500px; margin: auto; }
+
+    /* Upload Foto Placeholder */
+    .image-picker-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .image-preview {
+      width: 90px;
+      height: 90px;
+      border-radius: 12px;
+      border: 1px dashed var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-gray);
+      margin-bottom: 8px;
+    }
+    .image-actions { display: flex; gap: 16px; font-size: 20px; }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #495057; }
+    
+    .input-pill {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--border-color);
+      border-radius: 23px;
+      padding: 0 16px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+    }
+    .input-pill:focus { border-color: var(--primary-green); }
+
+    .input-with-icon { position: relative; display: flex; align-items: center; }
+    .input-with-icon .input-pill { padding-right: 48px; }
+    .input-with-icon .icon-action {
+      position: absolute;
+      right: 6px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #e8f7f0;
+      color: var(--primary-green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Card Multisatuan */
+    .card-unit {
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .card-unit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .unit-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .unit-table th { text-align: left; color: var(--text-muted); font-weight: normal; padding-bottom: 6px; }
+    .unit-table td { padding: 6px 0; font-weight: 500; }
+    .unit-table .del-btn { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 16px; }
+
+    /* Checkbox */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+    .checkbox-row input[type="checkbox"] {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      display: grid;
+      place-content: center;
+      cursor: pointer;
+    }
+    .checkbox-row input[type="checkbox"]:checked {
+      background: var(--primary-green);
+      border-color: var(--primary-green);
+    }
+    .checkbox-row input[type="checkbox"]:checked::before {
+      content: "✓";
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    /* Fixed Bottom Button */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px;
+      background: white;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: center;
+    }
+    .btn-save {
+      width: 100%;
+      max-width: 500px;
+      height: 46px;
+      background: var(--primary-green);
+      color: white;
+      border: none;
+      border-radius: 23px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Tampilan Kasir */
+    .catalog-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Layar Pengaturan Produk (Sesuai Desain Anda) -->
+  <div id="screen-setup">
+    <div class="top-bar">
+      <h1>Edit Barang</h1>
+      <button class="nav-toggle" onclick="toggleScreen()">Buka Kasir →</button>
+    </div>
+
+    <div class="form-container">
+      <div class="image-picker-box">
+        <div class="image-preview">
+          <span style="color: var(--text-muted); font-size: 12px;">Foto Produk</span>
+        </div>
+        <div class="image-actions">
+          <span>📷</span>
+          <span>🖼️</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nama*</label>
+        <input type="text" id="prod-name" class="input-pill" value="Alas TAR 20 sq">
+      </div>
+
+      <div class="form-group">
+        <label>Tipe Barang</label>
+        <select class="input-pill">
+          <option value="multisatuan">Multisatuan</option>
+          <option value="tunggal">Satuan Tunggal</option>
+        </select>
+      </div>
+
+      <!-- Card Data Satuan Lengkap -->
+      <div class="card-unit">
+        <div class="card-unit-header">
+          <span style="font-weight: 600;">Data Satuan</span>
+          <div>
+            <button style="border:none; background:none; cursor:pointer;">✏️</button>
+            <button style="border:none; background:none; cursor:pointer;">🗑️</button>
+          </div>
+        </div>
+        
+        <table class="unit-table">
+          <thead>
+            <tr>
+              <th>Satuan Terkecil</th>
+              <th>Jumlah</th>
+              <th>Harga</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>pcs</td>
+              <td>1</td>
+              <td>Rp 3.000</td>
+              <td></td>
+            </tr>
+            <tr>
+              <th style="padding-top: 8px;">Tipe Satuan</th>
+              <th style="padding-top: 8px;">Jumlah</th>
+              <th style="padding-top: 8px;">Harga</th>
+              <th></th>
+            </tr>
+            <tr>
+              <td>pak</td>
+              <td>10</td>
+              <td>Rp 27.000</td>
+              <td><button class="del-btn">🗑️</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" checked>
+        <span>Tampilkan di Transaksi</span>
+      </label>
+
+      <label class="checkbox-row">
+        <input type="checkbox" checked>
+        <span>Pakai stok</span>
+      </label>
+
+      <div class="form-group">
+        <label>Stok*</label>
+        <div class="input-with-icon">
+          <input type="number" id="prod-stock" class="input-pill" value="204">
+          <button class="icon-action">✏️</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Kode*</label>
+        <div class="input-with-icon">
+          <input type="text" class="input-pill" value="116">
+          <button class="icon-action" style="font-size: 16px;">|||||</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Harga Beli Terakhir*</label>
+        <div class="input-with-icon">
+          <input type="text" class="input-pill" value="Rp 950">
+          <button class="icon-action">✏️</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-save" onclick="alert('Pengaturan Tersimpan!')">Simpan</button>
+    </div>
+  </div>
+
+  <!-- Layar Kasir Penjualan -->
+  <div id="screen-pos" class="hidden">
+    <div class="top-bar">
+      <h1>Kasir Penjualan</h1>
+      <button class="nav-toggle" onclick="toggleScreen()">← Pengaturan</button>
+    </div>
+
+    <div class="form-container">
+      <div class="catalog-item">
+        <div>
+          <b>Alas TAR 20 sq</b><br>
+          <small style="color: var(--text-muted);">Sisa: <span id="pos-stock">204</span> pcs</small>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <select id="pos-unit" style="padding: 6px; border-radius: 8px;">
+            <option value="1|3000">1 pcs (Rp 3.000)</option>
+            <option value="10|27000">1 pak (Rp 27.000)</option>
+          </select>
+          <button class="btn-save" style="width: auto; padding: 0 14px; height: 36px;" onclick="sellItem()">Jual</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let stock = 204;
+    function toggleScreen() {
+      document.getElementById('screen-setup').classList.toggle('hidden');
+      document.getElementById('screen-pos').classList.toggle('hidden');
+    }
+
+    function sellItem() {
+      const selected = document.getElementById('pos-unit').value.split('|');
+      const multiplier = parseInt(selected[0]);
+      const price = parseInt(selected[1]);
+
+      if (stock < multiplier) {
+        alert('Stok tidak cukup!');
+        return;
+      }
+
+      stock -= multiplier;
+      document.getElementById('pos-stock').innerText = stock;
+      document.getElementById('prod-stock').value = stock;
+      alert('Terjual! Senilai Rp ' + price.toLocaleString('id-ID'));
+    }
+  </script>
+</body>
+</html>
