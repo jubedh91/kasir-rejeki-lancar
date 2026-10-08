@@ -43,6 +43,9 @@
                     <a href="#" onclick="switchView('products')" id="nav-products" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                         <i class="fa-solid fa-boxes-stacked w-5"></i><span>Manajemen Barang</span>
                     </a>
+                    <a href="#" onclick="switchView('reports')" id="nav-reports" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
+                        <i class="fa-solid fa-file-invoice-dollar w-5"></i><span>Laporan Transaksi</span>
+                    </a>
                 </nav>
             </div>
 
@@ -53,7 +56,7 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                             <i class="fa-solid fa-search"></i>
                         </span>
-                        <input type="text" id="search-box" oninput="filterProducts(this.value)" placeholder="Cari nama barang atau scan barcode..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                        <input type="text" id="search-box" oninput="filterProducts(this.value)" placeholder="Cari nama barang..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
                     </div>
                     <button onclick="loadInitialData()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm" title="Refresh Data">
                         <i class="fa-solid fa-rotate"></i>
@@ -113,7 +116,33 @@
                                 </tr>
                             </thead>
                             <tbody id="inventory-table-body" class="divide-y divide-gray-200">
-                                <!-- Data Inventory dirender disini -->
+                                <!-- Data Inventory -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: LAPORAN & RIWAYAT TRANSAKSI -->
+            <div id="view-reports" class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
+                <div class="p-4 bg-white border-b flex justify-between items-center">
+                    <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-file-invoice-dollar mr-2 text-emerald-600"></i>Riwayat Transaksi Penjualan</h2>
+                    <button onclick="loadTransactions()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-2 rounded-lg text-sm font-semibold">
+                        <i class="fa-solid fa-rotate mr-1"></i> Muat Ulang Laporan
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="bg-white rounded-xl shadow border overflow-hidden">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                                <tr>
+                                    <th class="p-3">Waktu Transaksi</th>
+                                    <th class="p-3">Detail Item</th>
+                                    <th class="p-3">Total Belanja</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transaction-table-body" class="divide-y divide-gray-200">
+                                <!-- Riwayat transaksi dimuat disini -->
                             </tbody>
                         </table>
                     </div>
@@ -161,7 +190,7 @@
     <!-- Firebase Script & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKoQSo",
@@ -183,31 +212,45 @@
         window.switchView = function(viewName) {
             const posView = document.getElementById('view-pos');
             const prodView = document.getElementById('view-products');
+            const repView = document.getElementById('view-reports');
+            
             const navPos = document.getElementById('nav-pos');
             const navProd = document.getElementById('nav-products');
+            const navRep = document.getElementById('nav-reports');
+            
             const appTitle = document.getElementById('app-title');
             const floatingCart = document.getElementById('floating-cart-btn');
 
+            // Reset semua view & menu active class
+            posView.classList.add('hidden');
+            prodView.classList.add('hidden');
+            repView.classList.add('hidden');
+            navPos.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
+            navProd.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
+            navRep.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
+
             if (viewName === 'pos') {
                 posView.classList.remove('hidden');
-                prodView.classList.add('hidden');
                 navPos.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium";
-                navProd.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
                 appTitle.innerText = "Kasir (POS)";
                 floatingCart.style.display = "block";
-            } else {
-                posView.classList.add('hidden');
+            } else if (viewName === 'products') {
                 prodView.classList.remove('hidden');
                 navProd.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium";
-                navPos.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
                 appTitle.innerText = "Manajemen Barang";
                 floatingCart.style.display = "none";
                 renderInventoryTable();
+            } else if (viewName === 'reports') {
+                repView.classList.remove('hidden');
+                navRep.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium";
+                appTitle.innerText = "Laporan Transaksi";
+                floatingCart.style.display = "none";
+                loadTransactions();
             }
-            toggleSidebar(); // Tutup drawer di mobile
+            toggleSidebar();
         };
 
-        // Load Initial Data (dengan Caching Lokal)
+        // Load Initial Data (Produk)
         window.loadInitialData = async function() {
             const cachedProducts = localStorage.getItem('pos_products_cache');
             if (cachedProducts) {
@@ -232,6 +275,47 @@
             } catch (error) {
                 console.error("Gagal sinkron:", error);
                 document.getElementById('sync-status').innerText = "Offline Mode";
+            }
+        };
+
+        // Load Riwayat Transaksi dari Firebase
+        window.loadTransactions = async function() {
+            const tbody = document.getElementById('transaction-table-body');
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Memuat data laporan...</td></tr>`;
+
+            try {
+                const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                tbody.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Belum ada riwayat transaksi.</td></tr>`;
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const dateStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString('id-ID') : 'Baru saja';
+                    
+                    let itemsHtml = '<ul class="text-xs text-gray-600 list-disc list-inside">';
+                    if (data.items && Array.isArray(data.items)) {
+                        data.items.forEach(i => {
+                            itemsHtml += `<li>${i.name} (${i.qty}x @Rp ${Number(i.price).toLocaleString('id-ID')})</li>`;
+                        });
+                    }
+                    itemsHtml += '</ul>';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 text-xs text-gray-600 align-top">${dateStr}</td>
+                            <td class="p-3 align-top">${itemsHtml}</td>
+                            <td class="p-3 text-emerald-600 font-bold align-top">Rp ${Number(data.totalAmount).toLocaleString('id-ID')}</td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                console.error("Gagal memuat laporan:", e);
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-red-500">Gagal mengambil data laporan dari server.</td></tr>`;
             }
         };
 
@@ -303,25 +387,23 @@
                     name, price, stock, createdAt: serverTimestamp()
                 });
                 
-                // Update state lokal
                 products.push({ id: docRef.id, name, price, stock });
                 localStorage.setItem('pos_products_cache', JSON.stringify(products));
                 
                 renderProducts(products);
                 closeAddProductModal();
-                alert('Barang berhasil ditambahkan ke database!');
+                alert('Barang berhasil ditambahkan!');
                 
-                // Clear form
                 document.getElementById('input-name').value = '';
                 document.getElementById('input-price').value = '';
                 document.getElementById('input-stock').value = '';
             } catch (e) {
                 console.error("Gagal tambah barang:", e);
-                alert('Gagal menyimpan barang ke Firebase.');
+                alert('Gagal menyimpan barang.');
             }
         };
 
-        // Hapus Produk dari Firebase
+        // Hapus Produk
         window.deleteProductFromCloud = async function(id) {
             if (!confirm('Yakin ingin menghapus barang ini?')) return;
             try {
@@ -333,7 +415,7 @@
                 alert('Barang berhasil dihapus.');
             } catch (e) {
                 console.error("Gagal menghapus:", e);
-                alert('Gagal menghapus barang dari database.');
+                alert('Gagal menghapus barang.');
             }
         };
 
