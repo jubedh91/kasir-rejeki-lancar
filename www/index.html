@@ -34,7 +34,7 @@
             <!-- Sidebar Drawer -->
             <div id="sidebar" class="absolute md:relative inset-y-0 left-0 w-64 bg-white shadow-xl z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
                 <div class="p-4 bg-emerald-900 text-white font-bold text-center">
-                    Menu Navigasi
+                    Menu Navigasi Toko
                 </div>
                 <nav class="flex-1 overflow-y-auto p-2 space-y-1">
                     <a href="#" onclick="switchView('pos')" id="nav-pos" class="flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium">
@@ -59,7 +59,7 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
                             <i class="fa-solid fa-search"></i>
                         </span>
-                        <input type="text" id="search-box" oninput="filterProducts(this.value)" placeholder="Cari nama barang..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                        <input type="text" id="search-box" oninput="filterProducts(this.value)" placeholder="Cari nama barang atau scan barcode..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
                     </div>
                     <button onclick="loadInitialData()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm" title="Refresh Data">
                         <i class="fa-solid fa-rotate"></i>
@@ -92,14 +92,14 @@
                                 <span id="cart-total" class="text-emerald-600">Rp 0</span>
                             </div>
                             <button onclick="processCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow transition duration-200">
-                                BAYAR SEKARANG
+                                BAYAR SEKARANG & CETAK RAWBT
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 2: MANAJEMEN BARANG (INVENTARIS) -->
+            <!-- VIEW 2: MANAJEMEN BARANG -->
             <div id="view-products" class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
                 <div class="p-4 bg-white border-b flex justify-between items-center">
                     <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-boxes-stacked mr-2 text-emerald-600"></i>Daftar & Tambah Barang</h2>
@@ -126,7 +126,7 @@
                 </div>
             </div>
 
-            <!-- VIEW 3: LAPORAN & RIWAYAT TRANSAKSI -->
+            <!-- VIEW 3: LAPORAN TRANSAKSI -->
             <div id="view-reports" class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
                 <div class="p-4 bg-white border-b flex justify-between items-center">
                     <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-file-invoice-dollar mr-2 text-emerald-600"></i>Riwayat Transaksi Penjualan</h2>
@@ -253,6 +253,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKoQSo",
             authDomain: "pos-rejeki-lancar.firebaseapp.com",
@@ -269,10 +270,9 @@
         let products = [];
         let cart = [];
 
-        // Switch antar Views
+        // Navigasi View
         window.switchView = function(viewName) {
-            const views = ['pos', 'products', 'reports', 'debts'];
-            views.forEach(v => {
+            ['pos', 'products', 'reports', 'debts'].forEach(v => {
                 document.getElementById(`view-${v}`).classList.add('hidden');
                 document.getElementById(`nav-${v}`).className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
             });
@@ -282,7 +282,6 @@
             
             const titles = { pos: 'Kasir (POS)', products: 'Manajemen Barang', reports: 'Laporan Transaksi', debts: 'Hutang-Piutang' };
             document.getElementById('app-title').innerText = titles[viewName];
-            
             document.getElementById('floating-cart-btn').style.display = (viewName === 'pos') ? 'block' : 'none';
 
             if (viewName === 'products') renderInventoryTable();
@@ -292,7 +291,7 @@
             toggleSidebar();
         };
 
-        // Load Initial Data (Produk)
+        // Load Data dengan Caching Lokal (Optimasi Kuota Read Firebase)
         window.loadInitialData = async function() {
             const cachedProducts = localStorage.getItem('pos_products_cache');
             if (cachedProducts) {
@@ -320,10 +319,10 @@
             }
         };
 
-        // Load Riwayat Transaksi
+        // Load Laporan Transaksi
         window.loadTransactions = async function() {
             const tbody = document.getElementById('transaction-table-body');
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Memuat data...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Memuat data laporan...</td></tr>`;
 
             try {
                 const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
@@ -591,6 +590,7 @@
             renderCart();
         };
 
+        // Proses Checkout & Integrasi Cetak Struk ke RawBT
         window.processCheckout = async function() {
             if (cart.length === 0) return alert('Keranjang masih kosong!');
 
@@ -605,19 +605,25 @@
                 await addDoc(collection(db, "transactions"), transactionData);
                 alert('Transaksi Berhasil Disimpan!');
 
-                let printText = "TOKO REJEKI LANCAR\n==========================\n";
+                // Format Cetak Struk ESC/POS untuk RawBT
+                let printText = "   TOKO REJEKI LANCAR   \n";
+                printText += "Jl. Bromo, Pujon, Malang\n";
+                printText += "==========================\n";
                 cart.forEach(i => {
                     printText += `${i.name}\n  ${i.qty} x ${i.price} = ${i.qty * i.price}\n`;
                 });
-                printText += `==========================\nTOTAL: Rp ${total.toLocaleString('id-ID')}\nTerima Kasih!\n\n\n`;
+                printText += "==========================\n";
+                printText += `TOTAL: Rp ${total.toLocaleString('id-ID')}\n`;
+                printText += "Terima Kasih Atas Kunjungan Anda!\n\n\n";
 
+                // Panggil Intent RawBT
                 window.location.href = `rawbt:base64,${btoa(printText)}`;
 
                 cart = [];
                 renderCart();
             } catch (e) {
                 console.error("Gagal simpan transaksi:", e);
-                alert('Gagal memproses transaksi.');
+                alert('Gagal memproses transaksi ke database.');
             }
         };
 
