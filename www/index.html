@@ -46,6 +46,9 @@
                     <a href="#" onclick="switchView('reports')" id="nav-reports" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
                         <i class="fa-solid fa-file-invoice-dollar w-5"></i><span>Laporan Transaksi</span>
                     </a>
+                    <a href="#" onclick="switchView('debts')" id="nav-debts" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
+                        <i class="fa-solid fa-book-bookmark w-5"></i><span>Hutang-Piutang</span>
+                    </a>
                 </nav>
             </div>
 
@@ -128,7 +131,7 @@
                 <div class="p-4 bg-white border-b flex justify-between items-center">
                     <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-file-invoice-dollar mr-2 text-emerald-600"></i>Riwayat Transaksi Penjualan</h2>
                     <button onclick="loadTransactions()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-3 py-2 rounded-lg text-sm font-semibold">
-                        <i class="fa-solid fa-rotate mr-1"></i> Muat Ulang Laporan
+                        <i class="fa-solid fa-rotate mr-1"></i> Muat Ulang
                     </button>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4">
@@ -136,13 +139,41 @@
                         <table class="w-full text-left border-collapse text-sm">
                             <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
                                 <tr>
-                                    <th class="p-3">Waktu Transaksi</th>
+                                    <th class="p-3">Waktu</th>
                                     <th class="p-3">Detail Item</th>
-                                    <th class="p-3">Total Belanja</th>
+                                    <th class="p-3">Total</th>
                                 </tr>
                             </thead>
                             <tbody id="transaction-table-body" class="divide-y divide-gray-200">
-                                <!-- Riwayat transaksi dimuat disini -->
+                                <!-- Riwayat transaksi -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: HUTANG-PIUTANG -->
+            <div id="view-debts" class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
+                <div class="p-4 bg-white border-b flex justify-between items-center">
+                    <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-book-bookmark mr-2 text-emerald-600"></i>Buku Hutang & Piutang</h2>
+                    <button onclick="openAddDebtModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow">
+                        <i class="fa-solid fa-plus mr-1"></i> Catat Baru
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="bg-white rounded-xl shadow border overflow-hidden">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                                <tr>
+                                    <th class="p-3">Nama Pihak</th>
+                                    <th class="p-3">Tipe</th>
+                                    <th class="p-3">Jumlah</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="debt-table-body" class="divide-y divide-gray-200">
+                                <!-- Data Hutang Piutang -->
                             </tbody>
                         </table>
                     </div>
@@ -187,10 +218,40 @@
         </div>
     </div>
 
+    <!-- MODAL HUTANG-PIUTANG -->
+    <div id="debt-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center">
+                <span>Form Catat Hutang / Piutang</span>
+                <button onclick="closeAddDebtModal()" class="text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-4 space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Pihak (Pelanggan / Supplier)</label>
+                    <input type="text" id="debt-name" class="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Contoh: Bpk. Budi">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tipe Pencatatan</label>
+                    <select id="debt-type" class="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="piutang">Piutang (Pelanggan Ngutang ke Toko)</option>
+                        <option value="hutang">Hutang (Toko Ngutang ke Supplier)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nominal (Rp)</label>
+                    <input type="number" id="debt-amount" class="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Contoh: 50000">
+                </div>
+                <button onclick="saveNewDebt()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm mt-4 shadow">
+                    SIMPAN CATATAN
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase Script & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKoQSo",
@@ -210,43 +271,24 @@
 
         // Switch antar Views
         window.switchView = function(viewName) {
-            const posView = document.getElementById('view-pos');
-            const prodView = document.getElementById('view-products');
-            const repView = document.getElementById('view-reports');
-            
-            const navPos = document.getElementById('nav-pos');
-            const navProd = document.getElementById('nav-products');
-            const navRep = document.getElementById('nav-reports');
-            
-            const appTitle = document.getElementById('app-title');
-            const floatingCart = document.getElementById('floating-cart-btn');
+            const views = ['pos', 'products', 'reports', 'debts'];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                document.getElementById(`nav-${v}`).className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
+            });
 
-            // Reset semua view & menu active class
-            posView.classList.add('hidden');
-            prodView.classList.add('hidden');
-            repView.classList.add('hidden');
-            navPos.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
-            navProd.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
-            navRep.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700";
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            document.getElementById(`nav-${viewName}`).className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium";
+            
+            const titles = { pos: 'Kasir (POS)', products: 'Manajemen Barang', reports: 'Laporan Transaksi', debts: 'Hutang-Piutang' };
+            document.getElementById('app-title').innerText = titles[viewName];
+            
+            document.getElementById('floating-cart-btn').style.display = (viewName === 'pos') ? 'block' : 'none';
 
-            if (viewName === 'pos') {
-                posView.classList.remove('hidden');
-                navPos.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium";
-                appTitle.innerText = "Kasir (POS)";
-                floatingCart.style.display = "block";
-            } else if (viewName === 'products') {
-                prodView.classList.remove('hidden');
-                navProd.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium";
-                appTitle.innerText = "Manajemen Barang";
-                floatingCart.style.display = "none";
-                renderInventoryTable();
-            } else if (viewName === 'reports') {
-                repView.classList.remove('hidden');
-                navRep.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium";
-                appTitle.innerText = "Laporan Transaksi";
-                floatingCart.style.display = "none";
-                loadTransactions();
-            }
+            if (viewName === 'products') renderInventoryTable();
+            if (viewName === 'reports') loadTransactions();
+            if (viewName === 'debts') loadDebts();
+            
             toggleSidebar();
         };
 
@@ -278,10 +320,10 @@
             }
         };
 
-        // Load Riwayat Transaksi dari Firebase
+        // Load Riwayat Transaksi
         window.loadTransactions = async function() {
             const tbody = document.getElementById('transaction-table-body');
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Memuat data laporan...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Memuat data...</td></tr>`;
 
             try {
                 const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
@@ -315,7 +357,92 @@
                 });
             } catch (e) {
                 console.error("Gagal memuat laporan:", e);
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-red-500">Gagal mengambil data laporan dari server.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-red-500">Gagal mengambil data dari server.</td></tr>`;
+            }
+        };
+
+        // Load Hutang Piutang
+        window.loadDebts = async function() {
+            const tbody = document.getElementById('debt-table-body');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-400">Memuat data hutang...</td></tr>`;
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "debts"));
+                tbody.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-400">Belum ada catatan hutang-piutang.</td></tr>`;
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const d = docSnap.data();
+                    const isLunas = d.status === 'Lunas';
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-medium text-gray-800">${d.name}</td>
+                            <td class="p-3 uppercase text-xs font-semibold ${d.type === 'piutang' ? 'text-blue-600' : 'text-orange-600'}">${d.type}</td>
+                            <td class="p-3 font-bold text-gray-700">Rp ${Number(d.amount).toLocaleString('id-ID')}</td>
+                            <td class="p-3">
+                                <span class="px-2 py-1 text-xs rounded font-semibold ${isLunas ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${d.status || 'Belum Lunas'}</span>
+                            </td>
+                            <td class="p-3 text-center space-x-2">
+                                <button onclick="toggleDebtStatus('${docSnap.id}', '${d.status}')" class="text-emerald-600 hover:text-emerald-800 text-xs bg-emerald-50 px-2 py-1 rounded border border-emerald-200">Ubah Status</button>
+                                <button onclick="deleteDebt('${docSnap.id}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                console.error("Gagal load hutang:", e);
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Gagal mengambil data hutang.</td></tr>`;
+            }
+        };
+
+        window.openAddDebtModal = () => document.getElementById('debt-modal').classList.remove('hidden');
+        window.closeAddDebtModal = () => document.getElementById('debt-modal').classList.add('hidden');
+
+        window.saveNewDebt = async function() {
+            const name = document.getElementById('debt-name').value;
+            const type = document.getElementById('debt-type').value;
+            const amount = Number(document.getElementById('debt-amount').value);
+
+            if (!name || isNaN(amount) || amount <= 0) return alert('Mohon isi nama dan nominal dengan benar!');
+
+            try {
+                await addDoc(collection(db, "debts"), {
+                    name, type, amount, status: 'Belum Lunas', createdAt: serverTimestamp()
+                });
+                closeAddDebtModal();
+                loadDebts();
+                alert('Catatan hutang berhasil disimpan!');
+                document.getElementById('debt-name').value = '';
+                document.getElementById('debt-amount').value = '';
+            } catch (e) {
+                console.error("Gagal simpan hutang:", e);
+                alert('Gagal menyimpan data.');
+            }
+        };
+
+        window.toggleDebtStatus = async function(id, currentStatus) {
+            const newStatus = (currentStatus === 'Lunas') ? 'Belum Lunas' : 'Lunas';
+            try {
+                await updateDoc(doc(db, "debts", id), { status: newStatus });
+                loadDebts();
+            } catch (e) {
+                console.error("Gagal update status:", e);
+                alert('Gagal mengubah status.');
+            }
+        };
+
+        window.deleteDebt = async function(id) {
+            if (!confirm('Hapus catatan ini?')) return;
+            try {
+                await deleteDoc(doc(db, "debts", id));
+                loadDebts();
+            } catch (e) {
+                console.error("Gagal hapus:", e);
+                alert('Gagal menghapus.');
             }
         };
 
@@ -364,36 +491,23 @@
             renderProducts(filtered);
         };
 
-        // Modal Controls
-        window.openAddProductModal = function() {
-            document.getElementById('product-modal').classList.remove('hidden');
-        };
-        window.closeAddProductModal = function() {
-            document.getElementById('product-modal').classList.add('hidden');
-        };
+        window.openAddProductModal = () => document.getElementById('product-modal').classList.remove('hidden');
+        window.closeAddProductModal = () => document.getElementById('product-modal').classList.add('hidden');
 
-        // Tambah Produk Baru ke Firebase
         window.saveNewProduct = async function() {
             const name = document.getElementById('input-name').value;
             const price = Number(document.getElementById('input-price').value);
             const stock = Number(document.getElementById('input-stock').value);
 
-            if (!name || !price || isNaN(stock)) {
-                return alert('Semua kolom wajib diisi dengan benar!');
-            }
+            if (!name || !price || isNaN(stock)) return alert('Semua kolom wajib diisi dengan benar!');
 
             try {
-                const docRef = await addDoc(collection(db, "products"), {
-                    name, price, stock, createdAt: serverTimestamp()
-                });
-                
+                const docRef = await addDoc(collection(db, "products"), { name, price, stock, createdAt: serverTimestamp() });
                 products.push({ id: docRef.id, name, price, stock });
                 localStorage.setItem('pos_products_cache', JSON.stringify(products));
-                
                 renderProducts(products);
                 closeAddProductModal();
                 alert('Barang berhasil ditambahkan!');
-                
                 document.getElementById('input-name').value = '';
                 document.getElementById('input-price').value = '';
                 document.getElementById('input-stock').value = '';
@@ -403,7 +517,6 @@
             }
         };
 
-        // Hapus Produk
         window.deleteProductFromCloud = async function(id) {
             if (!confirm('Yakin ingin menghapus barang ini?')) return;
             try {
@@ -415,22 +528,18 @@
                 alert('Barang berhasil dihapus.');
             } catch (e) {
                 console.error("Gagal menghapus:", e);
-                alert('Gagal menghapus barang.');
+                alert('Gagal menghapus.');
             }
         };
 
-        // Keranjang Kasir
         window.addToCart = function(id) {
             const product = products.find(p => p.id === id);
             if (!product || product.stock <= 0) return alert('Stok barang habis!');
 
             const existing = cart.find(item => item.id === id);
             if (existing) {
-                if (existing.qty < product.stock) {
-                    existing.qty++;
-                } else {
-                    alert('Stok maksimal tercapai');
-                }
+                if (existing.qty < product.stock) existing.qty++;
+                else alert('Stok maksimal tercapai');
             } else {
                 cart.push({ ...product, qty: 1 });
             }
@@ -478,13 +587,10 @@
 
         window.updateQty = function(index, change) {
             cart[index].qty += change;
-            if (cart[index].qty <= 0) {
-                cart.splice(index, 1);
-            }
+            if (cart[index].qty <= 0) cart.splice(index, 1);
             renderCart();
         };
 
-        // Checkout & RawBT Print Intent
         window.processCheckout = async function() {
             if (cart.length === 0) return alert('Keranjang masih kosong!');
 
@@ -499,7 +605,6 @@
                 await addDoc(collection(db, "transactions"), transactionData);
                 alert('Transaksi Berhasil Disimpan!');
 
-                // Format Cetak Struk ESC/POS untuk RawBT
                 let printText = "TOKO REJEKI LANCAR\n==========================\n";
                 cart.forEach(i => {
                     printText += `${i.name}\n  ${i.qty} x ${i.price} = ${i.qty * i.price}\n`;
@@ -516,15 +621,8 @@
             }
         };
 
-        window.toggleSidebar = function() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
-        };
-
-        window.toggleCartMobile = function() {
-            const cartPanel = document.getElementById('cart-panel');
-            cartPanel.classList.toggle('translate-x-full');
-        };
+        window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        window.toggleCartMobile = () => document.getElementById('cart-panel').classList.toggle('translate-x-full');
 
         loadInitialData();
     </script>
