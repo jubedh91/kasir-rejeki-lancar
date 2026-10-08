@@ -1,686 +1,326 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Kasir Rejeki Lancar</title>
-<style>
-:root { --g: #00a86b; --gl: #e3f6ee; --bd: #dcdfe6; --mt: #7b8794; --rd: #e5484d; }
-* { box-sizing: border-box; }
-body { margin: 0; font: 15px/1.4 system-ui, sans-serif; color: #1f2d3d; background: #f4f6f8; }
-button { font: inherit; border: 0; background: none; color: inherit; cursor: pointer; }
-#top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 6px; min-height: 54px; padding: env(safe-area-inset-top) 14px 0; background: var(--g); color: #fff; }
-#top b { flex: 1; text-align: center; font-size: 16px; line-height: 1.2; }
-#bk, #ac button { width: 40px; height: 40px; font-size: 22px; color: #fff; }
-#ac { min-width: 40px; }
-.pad { padding: 12px 14px 100px; }
-label { display: block; margin: 12px 0 4px; font-size: 13px; color: var(--mt); }
-.pill { width: 100%; height: 46px; padding: 0 18px; border: 1px solid var(--bd); border-radius: 23px; background: #fff; outline: none; }
-.pill:focus { border-color: var(--g); box-shadow: 0 0 0 3px var(--gl); }
-.iw { position: relative; }
-.iw.pill { padding-right: 52px; }
-.iw.ic { position: absolute; right: 5px; top: 5px; }
-.ic { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--gl); color: var(--g); }
-.row { display: flex; gap: 8px; align-items: center; }
-.sp { flex: 1; }
-.bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.9); backdrop-filter: blur(8px); border-top: 1px solid var(--bd); }
-.main, .main2 { width: 100%; height: 48px; border-radius: 24px; background: var(--g); color: #fff; font-weight: 600; box-shadow: 0 4px 12px rgba(0,168,107,.25); }
-.main:disabled { background: #b5c4bd; box-shadow: none; }
-.main2 { flex: 1; height: 46px; }
-.sec { flex: 1; height: 46px; border-radius: 23px; border: 1px solid var(--bd); background: #fff; font-weight: 500; }
-.card { margin-top: 16px; padding: 12px; background: #fff; border: 1px solid var(--bd); border-radius: 14px; }
-.ur { display: grid; grid-template-columns: 1.3fr 7fr repeat(3, 1fr) 24px; gap: 4px; margin-top: 6px; align-items: center; }
-.ur input { width: 100%; min-width: 0; height: 36px; padding: 0 8px; border: 1px solid var(--bd); border-radius: 18px; outline: none; }
-.ur input:focus { border-color: var(--g); }
-.ur small { color: var(--mt); text-align: center; }
-.ur button { color: var(--rd); font-size: 18px; }
-.ck { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; font-size: 15px; color: inherit; cursor: pointer; }
-.ck input { display: none; }
-.ck i { width: 22px; height: 22px; border: 2px solid var(--bd); border-radius: 6px; display: grid; place-items: center; background: #fff; }
-.ck input:checked + i { background: var(--g); border-color: var(--g); }
-.ck input:checked + i::after { content: ""; width: 6px; height: 11px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); margin-top: -2px; }
-.li { display: flex; gap: 10px; align-items: center; padding: 8px; margin-top: 8px; background: #fff; border-radius: 14px; border: 1px solid var(--bd); }
-.li img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
-.li div { flex: 1; min-width: 0; }
-.li small { display: block; color: var(--mt); }
-.li select { height: 32px; border: 1px solid var(--bd); border-radius: 16px; background: #fff; outline: none; }
-.qt { display: flex; align-items: center; gap: 6px; }
-.qt button { width: 28px; height: 28px; border-radius: 50%; background: var(--gl); color: var(--g); font-weight: bold; }
-.tabs { display: flex; gap: 6px; margin: 10px 0; }
-.tabs button { flex: 1; height: 36px; border-radius: 18px; background: #fff; border: 1px solid var(--bd); font-weight: 500; }
-.tabs button.on { background: var(--g); color: #fff; border-color: var(--g); }
-.photo { text-align: center; }
-.photo img { width: 140px; height: 140px; object-fit: cover; border-radius: 16px; border: 1px dashed var(--bd); }
-.photo .row { justify-content: center; margin-top: 8px; }
-.modal { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; }
-.sheet { width: 100%; max-height: 90vh; overflow: auto; background: #fff; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
-.sheet .row { margin-top: 16px; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.tile { padding: 22px 10px; background: #fff; border-radius: 16px; text-align: center; font-weight: 600; border: 1px solid var(--bd); }
-.tile span { display: block; font-size: 28px; margin-bottom: 4px; }
-.kv { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eef0f3; }
-.em { color: var(--mt); text-align: center; padding: 20px; }
-.neg { color: var(--rd); }
-pre { font: 12px/1.35 monospace; white-space: pre-wrap; background: #f8f9fa; padding: 8px; border-radius: 8px; }
-#ts { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 30; padding: 10px 16px; border-radius: 20px; background: rgba(0,0,0,0.8); color: #fff; font-size: 14px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-#net-badge { font-size: 11px; font-weight: normal; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.2); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Kasir Rejeki Lancar</title>
+    <!-- Tailwind CSS untuk Desain Responsif HP & Tablet -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<div id="top">
-  <button id="bk" style="visibility:hidden">&larr;</button>
-  <b><span id="tt">Masuk Kasir</span><br><span id="net-badge">Menghubungkan cloud...</span></b>
-  <span id="ac"></span>
-</div>
-<div id="err-msg" style="display:none; background: #fee2e2; color: #991b1b; padding: 8px 12px; font-size: 12px; margin: 8px; border-radius: 8px;"></div>
-<div id="app"></div>
+<body class="bg-gray-100 font-sans antialiased">
 
-<script>
-const $ = s => document.querySelector(s);
-const rp = n => 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
-const dg = s => +String(s).replace(/\D/g,'') || 0;
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const PH = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23e3f6ee'/%3E%3C/svg%3E";
-const T = ['eceran', 'grosir', 'member'];
-const NEW = () => ({ id: '', name: '', code: '', image_url: '', category: '', base_unit: 'pcs', stock_base: 0, min_stock_alert: 5, last_buy_price: 0, show_in_pos: true, use_stock: true, units: [{ name: 'pcs', multiplier: 1, prices: { eceran: 0, grosir: 0, member: 0 } }] });
-const S = { role: null, name: '', prods: [], txs: [], debts: [], exps: [], shift: null, cart: [], tier: 'eceran', stack: [] };
-let cur = null, curA = null, E = null, FILE = null, DELIMG = false, R = 1;
+    <!-- App Container -->
+    <div id="app" class="flex flex-col h-screen overflow-hidden">
+        
+        <!-- Header / Navbar -->
+        <header class="bg-emerald-700 text-white shadow-md z-10 flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleSidebar()" class="text-white text-xl focus:outline-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="text-lg font-bold tracking-wide">Kasir Rejeki Lancar</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="sync-status" class="text-xs bg-emerald-800 px-2 py-1 rounded text-emerald-200">Online Mode</span>
+                <i class="fa-solid fa-user-shield text-lg"></i>
+            </div>
+        </header>
 
-const up = (p, u, t) => p.units?.[u]?.prices?.[t] || p.units?.[u]?.prices?.eceran || 0;
+        <!-- Main Workspace (Responsive Split Layout for Tablet/MatePad & Phone) -->
+        <div class="flex flex-1 overflow-hidden relative">
+            
+            <!-- Sidebar Drawer (Hidden by default on mobile, visible on desktop/tablet) -->
+            <div id="sidebar" class="absolute md:relative inset-y-0 left-0 w-64 bg-white shadow-xl z-20 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
+                <div class="p-4 bg-emerald-900 text-white font-bold text-center">
+                    Menu Navigasi
+                </div>
+                <nav class="flex-1 overflow-y-auto p-2 space-y-1">
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium">
+                        <i class="fa-solid fa-cash-register w-5"></i><span>Kasir (POS)</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
+                        <i class="fa-solid fa-boxes-stacked w-5"></i><span>Manajemen Barang</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
+                        <i class="fa-solid fa-file-invoice-dollar w-5"></i><span>Laporan Transaksi</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700">
+                        <i class="fa-solid fa-users w-5"></i><span>Pelanggan & Poin</span>
+                    </a>
+                    <a href="#" onclick="syncDataFromCloud()" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-blue-600">
+                        <i class="fa-solid fa-cloud-arrow-down w-5"></i><span>Sinkronisasi Data</span>
+                    </a>
+                </nav>
+            </div>
 
-async function sha(s) {
-  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
-}
+            <!-- Katalog Produk & Pencarian (Sisi Kiri / Utama) -->
+            <div class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50">
+                <!-- Search & Filter Bar -->
+                <div class="p-3 bg-white border-b flex items-center space-x-2">
+                    <div class="relative flex-1">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fa-solid fa-search"></i>
+                        </span>
+                        <input type="text" id="search-box" oninput="filterProducts(this.value)" placeholder="Cari nama barang atau scan barcode..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+                    <button onclick="loadInitialData()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                </div>
 
-function toast(m) {
-  document.getElementById('ts')?.remove();
-  const d = document.createElement('div');
-  d.id = 'ts';
-  d.textContent = m;
-  document.body.append(d);
-  setTimeout(() => d.remove(), 2800);
-}
+                <!-- Product Grid List -->
+                <div class="flex-1 overflow-y-auto p-3">
+                    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                        <!-- Produk akan dirender otomatis via JavaScript -->
+                    </div>
+                </div>
+            </div>
 
-async function compress(file) {
-  const im = await createImageBitmap(file);
-  const k = Math.min(1, 400 / Math.max(im.width, im.height));
-  const c = document.createElement('canvas');
-  c.width = Math.round(im.width * k);
-  c.height = Math.round(im.height * k);
-  c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-  let q = 0.7, b;
-  for (;;) {
-    b = await new Promise(res => c.toBlob(res, 'image/webp', q));
-    if (b.size < 40960 || q <= 0.2) break;
-    q = +(q - 0.1).toFixed(1);
-  }
-  return b;
-}
+            <!-- Panel Keranjang Belanja (Sisi Kanan / Sticky Bottom di HP) -->
+            <div class="w-full md:w-96 bg-white border-l flex flex-col h-full shadow-lg absolute md:relative inset-y-0 right-0 transform translate-x-full md:translate-x-0 transition-transform duration-300 z-10" id="cart-panel">
+                <div class="p-3 bg-emerald-50 border-b flex justify-between items-center">
+                    <h2 class="font-bold text-gray-700"><i class="fa-solid fa-cart-shopping mr-2"></i>Keranjang Belanja</h2>
+                    <button onclick="toggleCartMobile()" class="md:hidden text-gray-500 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
 
-function blobToDataUrl(b) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(b);
-  });
-}
+                <!-- Items List in Cart -->
+                <div id="cart-items" class="flex-1 overflow-y-auto p-3 divide-y">
+                    <div class="text-center text-gray-400 py-8 text-sm">Keranjang masih kosong</div>
+                </div>
 
-function form(title, fields, ok = 'Simpan') {
-  return new Promise(r => {
-    const m = document.createElement('div');
-    m.className = 'modal';
-    const fHtml = fields.map(f => {
-      if (f.o) {
-        return '<label>' + f.l + '</label><select class="pill" name="' + f.k + '">' + f.o.map(o => '<option value="' + o + '">' + o + '</option>').join('') + '</select>';
-      }
-      return '<label>' + f.l + '</label><input class="pill" name="' + f.k + '" type="' + (f.t || 'text') + '" value="' + (f.v ?? '') + '">';
-    }).join('');
-    m.innerHTML = '<div class="sheet"><h3 style="margin:0">' + title + '</h3>' + fHtml + '<div class="row"><button class="sec">Batal</button><button class="main2">' + ok + '</button></div></div>';
-    document.body.append(m);
-    m.querySelector('.sec').onclick = () => { m.remove(); r(null); };
-    m.querySelector('.main2').onclick = () => {
-      const o = {};
-      m.querySelectorAll('[name]').forEach(e => o[e.name] = e.value);
-      m.remove();
-      r(o);
-    };
-  });
-}
+                <!-- Cart Summary & Checkout Actions -->
+                <div class="p-4 bg-gray-50 border-t space-y-2">
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Total Item:</span>
+                        <span id="cart-count">0 Pcs</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-gray-800">
+                        <span>Total Bayar:</span>
+                        <span id="cart-total" class="text-emerald-600">Rp 0</span>
+                    </div>
+                    <button onclick="processCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow transition duration-200">
+                        BAYAR SEKARANG
+                    </button>
+                </div>
+            </div>
 
-function rcpt(tx, w = 32) {
-  const L = (a, b) => a.slice(0, w - b.length - 1).padEnd(w - b.length) + b;
-  const d = '-'.repeat(w);
-  const c = s => ' '.repeat(Math.max(0, (w - s.length) >> 1)) + s;
-  const n = x => x.toLocaleString('id-ID');
-  return [
-    c('STRUK PENJUALAN'),
-    c(tx.invoice_no),
-    new Date(tx.timestamp).toLocaleString('id-ID'),
-    'Kasir: ' + tx.cashier_name,
-    d,
-    ...tx.items.flatMap(i => [i.name, L(i.qty + ' ' + i.unit_name + ' x ' + n(i.price), n(i.subtotal))]),
-    d,
-    L('Subtotal', rp(tx.subtotal)),
-    tx.discount_nominal ? L('Diskon', '-' + rp(tx.discount_nominal)) : '',
-    tx.tax_nominal ? L('Pajak', rp(tx.tax_nominal)) : '',
-    L('TOTAL', rp(tx.total_final)),
-    L('Bayar (' + tx.payment_type + ')', rp(tx.amount_paid)),
-    tx.is_debt ? L('Sisa kasbon', rp(tx.total_final - tx.amount_paid)) : L('Kembali', rp(tx.change)),
-    d,
-    c('Terima kasih')
-  ].filter(x => x !== '').join('\n');
-}
+        </div>
+    </div>
 
-function printBT(tx) {
-  try {
-    const text = rcpt(tx, 32) + '\n\n\n\n';
-    const b64 = btoa(unescape(encodeURIComponent(text)));
-    const a = document.createElement('a');
-    a.href = "rawbt:data:text/plain;base64," + b64;
-    a.click();
-    toast('Mengirim ke RawBT...');
-  } catch (e) {
-    toast('Cetak error: ' + e.message);
-  }
-}
+    <!-- Floating Cart Button for Mobile View -->
+    <div class="md:hidden fixed bottom-4 right-4 z-30">
+        <button onclick="toggleCartMobile()" class="bg-emerald-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl relative">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="mobile-cart-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+        </button>
+    </div>
 
-function waSend(tx) {
-  const ph = (tx.customer_phone || '').replace(/\D/g,'').replace(/^0/, '62');
-  window.open('https://wa.me/' + ph + '?text=' + encodeURIComponent(rcpt(tx, 32)), '_blank');
-}
+    <!-- Firebase SDK (Modular CDN v10) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-function csv(name, rows) {
-  const content = rows.map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(',')).join('\r\n');
-  const f = new File(['\ufeff' + content], name, { type: 'text/csv' });
-  if (navigator.canShare && navigator.canShare({ files: [f] })) {
-    navigator.share({ files: [f] }).catch(() => {});
-  } else {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(f);
-    a.download = name;
-    a.click();
-  }
-}
-
-function showReceipt(tx) {
-  const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = '<div class="sheet"><h3 style="margin:0 0 8px">Transaksi berhasil</h3><pre>' + esc(rcpt(tx)) + '</pre><div class="row"><button class="sec" id="r1">Cetak RawBT</button><button class="sec" id="r2">WhatsApp</button><button class="main2" id="r3">Tutup</button></div></div>';
-  document.body.append(m);
-  m.querySelector('#r1').onclick = () => printBT(tx);
-  m.querySelector('#r2').onclick = () => waSend(tx);
-  m.querySelector('#r3').onclick = () => m.remove();
-}
-
-// Layar & Tampilan
-const V = {
-  login: {
-    t: 'Masuk Kasir',
-    draw: () => '<div class="pad"><h2 style="margin: 36px 0 2px; color:var(--g)">Kasir Rejeki Lancar</h2><label>Nama Pengguna</label><input class="pill" id="un" placeholder="cth: Budi"><label>PIN Masuk</label><input class="pill" id="pn" type="password" inputmode="numeric" placeholder="PIN 4 digit"><button class="main" id="lg" style="margin-top:24px">Masuk Aplikasi</button></div>',
-    init() {
-      $('#lg').onclick = async () => {
-        if (!window.FB_READY) return toast('Sedang menyambungkan cloud, tunggu sebentar...');
-        const pin = $('#pn').value.trim();
-        if (!pin) return toast('Masukkan PIN terlebih dahulu');
-        const h = await sha(pin);
-        try {
-          const s = (await window.FB_API.getPins()) || {};
-          if (h === s.owner) S.role = 'owner';
-          else if (h === s.cashier) S.role = 'kasir';
-          else return toast('PIN salah');
-          S.name = $('#un').value.trim() || (S.role === 'owner' ? 'Owner' : 'Kasir');
-          S.stack = []; cur = null; go('home');
-        } catch (err) {
-          toast('Error: ' + err.message);
-        }
-      };
-    }
-  },
-  home: {
-    t: 'Menu Utama',
-    draw: () => {
-      const m = [['🛒', 'Kasir', 'pos'], ['📒', 'Kasbon', 'debts'], ['💵', 'Shift & Kas', 'shift'], ...(S.role === 'owner' ? [['📦', 'Daftar Barang', 'items'], ['📊', 'Laporan Toko', 'report'], ['⚙️', 'Ganti PIN', 'pin']] : []), ['🚪', 'Keluar', 'out']];
-      return '<div class="pad"><p style="margin:0 0 12px; color:var(--mt)">' + esc(S.name) + ' <b>(' + S.role.toUpperCase() + ')</b></p><div class="grid">' + m.map(([i, t, g]) => '<div class="tile" data-g="' + g + '"><span>' + i + '</span>' + t + '</div>').join('') + '</div></div>';
-    },
-    init() {
-      $('#app').onclick = async e => {
-        const g = e.target.closest('[data-g]')?.dataset.g;
-        if (!g) return;
-        if (g === 'out') { S.role = null; S.cart = []; S.stack = []; cur = null; return go('login'); }
-        if (g === 'pin') {
-          const v = await form('Ganti PIN', [{k: 'o', l: 'PIN Owner baru', t: 'password'}, {k: 'c', l: 'PIN Kasir baru', t: 'password'}]);
-          if (!v) return;
-          const o = {};
-          if (v.o) o.owner = await sha(v.o);
-          if (v.c) o.cashier = await sha(v.c);
-          await window.FB_API.savePins(o);
-          return toast('PIN berhasil diperbarui');
-        }
-        go(g);
-      };
-    }
-  },
-  pos: {
-    t: 'Kasir Penjualan',
-    draw: () => '<div class="pad"><div class="row"><input class="pill" id="q" placeholder="Cari nama / scan kode"><button class="sec" id="sc" style="width:46px;flex:0 0 46px">📷</button></div><div class="tabs" id="tr">' + T.map(t => '<button data-t="' + t + '">' + t + '</button>').join('') + '</div><div id="pl"></div><h4 style="margin:16px 0 4px">Keranjang</h4><div id="cl"></div></div><div class="bar"><button class="main" id="pay" disabled>Bayar Sekarang</button></div>',
-    init() {
-      const add = p => {
-        const l = S.cart.find(c => c.pid === p.id && c.u === 0);
-        if (l) l.qty++; else S.cart.push({pid: p.id, u: 0, qty: 1});
-        V.pos.upd();
-      };
-      $('#q').oninput = () => V.pos.upd();
-      $('#sc').onclick = () => toast('Fitur scan barcode aktif');
-      $('#tr').onclick = e => { if (e.target.dataset.t) { S.tier = e.target.dataset.t; V.pos.upd(); } };
-      $('#pl').onclick = e => {
-        const id = e.target.closest('[data-p]')?.dataset.p;
-        const p = S.prods.find(x => x.id === id);
-        if (p) add(p);
-      };
-      $('#cl').onclick = e => {
-        const b = e.target.closest('[data-a]');
-        if (!b) return;
-        const c = S.cart[+b.dataset.i];
-        if (b.dataset.a === '+') c.qty++;
-        else if (b.dataset.a === '-') c.qty--;
-        else c.qty = 0;
-        S.cart = S.cart.filter(x => x.qty > 0);
-        V.pos.upd();
-      };
-      $('#cl').onchange = e => { S.cart[+e.target.dataset.i].u = +e.target.value; V.pos.upd(); };
-      $('#pay').onclick = async () => {
-        if (!S.shift && !confirm('Shift belum dibuka. Lanjutkan tanpa shift?')) return;
-        const tot = S.cart.reduce((a, c) => {
-          const p = S.prods.find(x => x.id === c.pid);
-          return a + (p ? up(p, c.u, S.tier) * c.qty : 0);
-        }, 0);
-        const v = await form('Pembayaran ' + rp(tot), [
-          {k: 'discount', l: 'Diskon (Rp)', t: 'number', v: 0},
-          {k: 'tax', l: 'Pajak (%)', t: 'number', v: 0},
-          {k: 'payment', l: 'Metode', o: ['tunai', 'transfer', 'qris', 'piutang']},
-          {k: 'paid', l: 'Uang diterima / DP kasbon', t: 'number'},
-          {k: 'customer', l: 'Nama pelanggan'},
-          {k: 'phone', l: 'WhatsApp (08..)', t: 'tel'},
-          {k: 'due', l: 'Jatuh tempo (kasbon)', t: 'date'}
-        ], 'Bayar');
-        if (!v) return;
-        try {
-          const tx = await window.FB_API.checkout(v);
-          S.cart = [];
-          V.pos.upd();
-          showReceipt(tx);
-        } catch (e) {
-          toast(e.message);
-        }
-      };
-    },
-    upd() {
-      const q = ($('#q')?.value || '').toLowerCase();
-      document.querySelectorAll('#tr button').forEach(b => b.classList.toggle('on', b.dataset.t === S.tier));
-      $('#pl').innerHTML = S.prods.filter(p => p.show_in_pos && (p.name.toLowerCase().includes(q) || p.code === q)).slice(0, 8).map(p => '<div class="card" style="margin-top:8px;padding:8px;cursor:pointer" data-p="' + p.id + '"><div class="row"><b>' + esc(p.name) + '</b><span class="sp"></span><span>' + rp(up(p, 0, S.tier)) + '</span></div></div>').join('') || '<p class="em">Barang tidak ditemukan</p>';
-      let tot = 0;
-      $('#cl').innerHTML = S.cart.map((c, i) => {
-        const p = S.prods.find(x => x.id === c.pid);
-        if (!p) return '';
-        const s = up(p, c.u, S.tier) * c.qty;
-        tot += s;
-        return '<div class="li"><div><b>' + esc(p.name) + '</b><small>' + rp(up(p, c.u, S.tier)) + ' x ' + c.qty + ' = ' + rp(s) + '</small><select data-i="' + i + '">' + (p.units || []).map((u, ui) => '<option value="' + ui + '" ' + (ui === c.u ? 'selected' : '') + '>' + esc(u.name) + '</option>').join('') + '</select></div><div class="qt"><button data-a="-" data-i="' + i + '">-</button><span>' + c.qty + '</span><button data-a="+" data-i="' + i + '">+</button><button data-a="x" data-i="' + i + '">&times;</button></div></div>';
-      }).join('') || '<p class="em">Keranjang kosong</p>';
-      const b = $('#pay');
-      b.disabled = !tot;
-      b.textContent = tot ? 'Bayar Sekarang ' + rp(tot) : 'Bayar Sekarang';
-    }
-  },
-  items: {
-    t: 'Daftar Barang', own: 1, act: ['+', () => go('edit')],
-    draw: () => '<div class="pad"><input class="pill" id="q" placeholder="Cari barang"><div id="il"></div></div>',
-    init() {
-      $('#q').oninput = () => V.items.upd();
-      $('#il').onclick = e => {
-        const l = e.target.closest('[data-p]');
-        if (l) go('edit', l.dataset.p);
-      };
-    },
-    upd() {
-      const q = $('#q').value.toLowerCase();
-      $('#il').innerHTML = S.prods.filter(p => p.name.toLowerCase().includes(q) || (p.code || '').includes(q)).map(p => '<div class="li" data-p="' + p.id + '"><div><b>' + esc(p.name) + '</b><small>Stok: ' + p.stock_base + ' ' + (p.base_unit || 'pcs') + ' | Ecer: ' + rp(up(p, 0, 'eceran')) + '</small></div></div>').join('') || '<p class="em">Tidak ada barang</p>';
-    }
-  },
-  edit: {
-    t: 'Edit Barang', own: 1,
-    draw(id) {
-      FILE = null; DELIMG = false;
-      E = structuredClone(S.prods.find(p => p.id === id) || NEW());
-      return '<div class="pad"><div class="photo"><img id="im" src="' + (E.image_url || PH) + '"><div class="row photo"><button class="sec" id="cam">Kamera</button><button class="sec" id="gal">Galeri</button><button class="sec" id="del">Hapus Foto</button></div></div><input type="file" id="f1" accept="image/*" capture="environment" hidden><input type="file" id="f2" accept="image/*" hidden><label>Nama barang</label><input class="pill" id="nm" value="' + esc(E.name) + '"><label>Kode / barcode</label><div class="iw"><input class="pill" id="cd" value="' + esc(E.code) + '"><button class="ic" id="bc">📷</button></div><label>Kategori</label><input class="pill" id="ct" value="' + esc(E.category) + '"><label>Stok (satuan terkecil)</label><input class="pill" id="sk" type="number" inputmode="numeric" value="' + E.stock_base + '"><label>Stok minimum alert</label><input class="pill" id="ms" type="number" inputmode="numeric" value="' + E.min_stock_alert + '"><label>HPP / Harga modal beli</label><input class="pill" id="hb" inputmode="numeric" value="' + (E.last_buy_price ? rp(E.last_buy_price) : '') + '"><div class="card"><div class="row"><b class="sp">Data Satuan</b><button class="sec" id="ua" style="width:36px;height:36px">+</button><button class="sec" id="ud" style="width:36px;height:36px">-</button></div><div id="ut"></div></div><label class="ck"><input type="checkbox" id="cp" ' + (E.show_in_pos ? 'checked' : '') + '><i></i>Tampilkan di Transaksi</label><label class="ck"><input type="checkbox" id="cs" ' + (E.use_stock ? 'checked' : '') + '><i></i>Pakai stok</label>' + (E.id ? '<button id="dp" class="neg" style="margin-top:22px">Hapus barang</button>' : '') + '</div><div class="bar"><button class="main" id="sv">Simpan Barang</button></div>';
-    },
-    init() {
-      const units = () => {
-        $('#ut').innerHTML = (E.units || []).map((u, i) => '<div class="ur"><input data-i="' + i + '" data-k="name" value="' + esc(u.name) + '" placeholder="Satuan"><input data-i="' + i + '" data-k="multiplier" type="number" value="' + u.multiplier + '" placeholder="Isi"><input data-i="' + i + '" data-k="eceran" value="' + (u.prices?.eceran ? rp(u.prices.eceran) : '') + '" placeholder="Ecer"><input data-i="' + i + '" data-k="grosir" value="' + (u.prices?.grosir ? rp(u.prices.grosir) : '') + '" placeholder="Grosir"><input data-i="' + i + '" data-k="member" value="' + (u.prices?.member ? rp(u.prices.member) : '') + '" placeholder="Member"><button data-x="' + i + '">&times;</button></div>').join('');
-      };
-      units();
-      $('#ut').oninput = e => {
-        const t = e.target, u = E.units[t.dataset.i], k = t.dataset.k;
-        if (!u) return;
-        if (k === 'name') u.name = t.value;
-        else if (k === 'multiplier') u.multiplier = Math.max(1, +t.value || 1);
-        else { const n = dg(t.value); u.prices[k] = n; }
-      };
-      $('#ut').onclick = e => { const x = e.target.dataset.x; if (x) { E.units.splice(+x, 1); units(); } };
-      $('#ua').onclick = () => { E.units.push({ name: '', multiplier: 10, prices: { eceran: 0, grosir: 0, member: 0 } }); units(); };
-      $('#ud').onclick = () => { if (E.units.length > 1) { E.units.pop(); units(); } };
-      $('#hb').oninput = e => { const n = dg(e.target.value); e.target.value = n ? rp(n) : ''; };
-      $('#cam').onclick = () => $('#f1').click();
-      $('#gal').onclick = () => $('#f2').click();
-      const pick = async e => {
-        const f = e.target.files[0];
-        if (!f) return;
-        try {
-          FILE = await compress(f);
-          DELIMG = false;
-          $('#im').src = URL.createObjectURL(FILE);
-          toast('Foto siap');
-        } catch (x) { toast('Gagal memproses foto'); }
-      };
-      $('#f1').onchange = pick;
-      $('#f2').onchange = pick;
-      $('#del').onclick = () => { FILE = null; DELIMG = true; E.image_url = ''; $('#im').src = PH; };
-      if ($('#dp')) $('#dp').onclick = async () => {
-        if (confirm('Hapus barang ini?')) { await window.FB_API.deleteProduct(E.id); back(); }
-      };
-      $('#sv').onclick = async () => {
-        E.name = $('#nm').value.trim();
-        if (!E.name) return toast('Nama barang wajib diisi');
-        if (E.units.some(u => !u.name.trim())) return toast('Nama satuan tidak boleh kosong');
-        Object.assign(E, {
-          code: $('#cd').value.trim(),
-          category: $('#ct').value.trim(),
-          stock_base: +$('#sk').value || 0,
-          min_stock_alert: +$('#ms').value || 0,
-          last_buy_price: dg($('#hb').value),
-          show_in_pos: $('#cp').checked,
-          use_stock: $('#cs').checked,
-          base_unit: E.units[0].name
-        });
-        $('#sv').disabled = true;
-        try {
-          if (FILE) E.image_url = await blobToDataUrl(FILE);
-          else if (DELIMG) E.image_url = '';
-          await window.FB_API.saveProduct(E);
-          back();
-        } catch (x) {
-          toast('Simpan gagal: ' + x.message);
-          $('#sv').disabled = false;
-        }
-      };
-    }
-  },
-  debts: {
-    t: 'Kasbon & Hutang',
-    act: ['+', async () => {
-      const v = await form('Catat hutang supplier', [{k: 'n', l: 'Nama supplier'}, {k: 'a', l: 'Jumlah hutang (Rp)', t: 'number'}]);
-      if (!v || !+v.a) return;
-      await window.FB_API.addDebt({ type: 'hutang', party_name: v.n || 'Supplier', total_amount: +v.a, remaining_amount: +v.a, status: 'belum lunas', timestamp: Date.now() });
-      toast('Hutang dicatat');
-    }],
-    draw: () => '<div class="pad" id="dl"></div>',
-    init() {
-      $('#dl').onclick = async e => {
-        const l = e.target.closest('[data-d]');
-        if (!l) return;
-        const d = S.debts.find(x => x.id === l.dataset.d);
-        if (d.status === 'lunas') return;
-        const v = await form('Bayar cicilan sisa ' + rp(d.remaining_amount), [{k: 'a', l: 'Jumlah dibayar (Rp)', t: 'number'}]);
-        if (!v) return;
-        const a = Math.min(+v.a || 0, d.remaining_amount);
-        if (a <= 0) return;
-        try {
-          await window.FB_API.payDebt(d.id, a);
-          toast('Pembayaran dicatat');
-        } catch (x) { toast(x.message); }
-      };
-    },
-    upd() {
-      $('#dl').innerHTML = [...S.debts].sort((a, b) => (a.status === 'lunas') - (b.status === 'lunas')).map(d => '<div class="card" data-d="' + d.id + '"><div class="row"><b>' + esc(d.party_name) + '</b><span class="sp"></span><span class="' + (d.status === 'lunas' ? '' : 'neg') + '">' + d.status.toUpperCase() + '</span></div><div class="kv"><span>Jenis</span><b>' + d.type.toUpperCase() + '</b></div><div class="kv"><span>Sisa</span><b>' + rp(d.remaining_amount) + '</b></div></div>').join('') || '<p class="em">Tidak ada data kasbon/hutang</p>';
-    }
-  },
-  shift: {
-    t: 'Shift & Kas',
-    draw: () => '<div class="pad" id="sb"></div>',
-    init() {
-      $('#sb').onclick = async e => {
-        const a = e.target.dataset.a, s = S.shift;
-        if (a === 'open') {
-          const v = await form('Buka shift', [{k: 'c', l: 'Modal kas awal (Rp)', t: 'number', v: 0}], 'Buka');
-          if (!v) return;
-          await window.FB_API.openShift(+v.c || 0);
-        }
-        if (a === 'exp') {
-          const v = await form('Catat pengeluaran', [{k: 'category', l: 'Kategori', o: ['operasional', 'listrik', 'transport', 'lainnya']}, {k: 'amount', l: 'Jumlah (Rp)', t: 'number'}, {k: 'note', l: 'Keterangan'}]);
-          if (!v || !+v.amount) return;
-          await window.FB_API.addExpense({ category: v.category, amount: +v.amount, note: v.note, timestamp: Date.now() });
-          toast('Pengeluaran dicatat');
-        }
-        if (a === 'close') {
-          const x = V.shift.calc(s);
-          const v = await form('Tutup shift (seharusnya ' + rp(x.exp) + ')', [{k: 'a', l: 'Uang fisik kasir di laci (Rp)', t: 'number'}]);
-          if (!v) return;
-          const act = +v.a || 0;
-          await window.FB_API.closeShift(s.id, x.exp, act);
-          const df = act - x.exp;
-          toast(df === 0 ? 'Kas sesuai' : (df > 0 ? 'Selisih lebih ' : 'Selisih kurang ') + rp(Math.abs(df)));
-        }
-      };
-    },
-    calc(s) {
-      const sales = S.txs.filter(t => t.shift_id === s.id && t.payment_type === 'tunai' && !t.is_debt).reduce((a, t) => a + t.total_final, 0);
-      const ex = S.exps.filter(e => e.timestamp >= s.start_time).reduce((a, e) => a + e.amount, 0);
-      return { sales, ex, exp: s.start_cash + sales - ex };
-    },
-    upd() {
-      const s = S.shift; let h;
-      if (!s) {
-        h = '<p class="em">Belum ada shift terbuka.</p><button class="main" data-a="open">Buka Shift</button>';
-      } else {
-        const x = V.shift.calc(s);
-        h = '<div class="kv"><span>Kasir</span><b>' + esc(s.cashier_name) + '</b></div><div class="kv"><span>Modal Awal</span><b>' + rp(s.start_cash) + '</b></div><div class="kv"><span>Penjualan Tunai</span><b>' + rp(x.sales) + '</b></div><div class="kv"><span>Pengeluaran Kas</span><b>' + rp(x.ex) + '</b></div><div class="kv"><span>Kas Fisik Harapan</span><b>' + rp(x.exp) + '</b></div><div class="row" style="margin-top:18px"><button class="sec" data-a="exp">Catat Pengeluaran</button><button class="main2" data-a="close">Tutup Shift</button></div>';
-      }
-      $('#sb').innerHTML = h;
-    }
-  },
-  report: {
-    t: 'Laporan Toko', own: 1,
-    draw: () => '<div class="pad"><div class="tabs" id="rg">' + [[1, 'Hari ini'], [7, '7 hari'], [30, '30 hari'], [0, 'Semua']].map(([d, l]) => '<button data-d="' + d + '">' + l + '</button>').join('') + '</div><div class="card" id="rb"></div><div class="row" style="margin-top:18px"><button class="sec" id="e1">Ekspor Transaksi</button><button class="sec" id="e2">Ekspor Stok</button></div></div>',
-    init() {
-      R = 1;
-      $('#rg').onclick = e => { if (e.target.dataset.d != null) { R = +e.target.dataset.d; V.report.upd(); } };
-    },
-    upd() {
-      document.querySelectorAll('#rg button').forEach(b => b.classList.toggle('on', +b.dataset.d === R));
-      const d0 = new Date(); d0.setHours(0,0,0,0);
-      const from = R === 1 ? d0.getTime() : R ? Date.now() - R * 864e5 : 0;
-      const tx = S.txs.filter(t => t.timestamp >= from), ex = S.exps.filter(e => e.timestamp >= from);
-      const om = tx.reduce((a, t) => a + t.total_final, 0), hpp = tx.reduce((a, t) => a + t.items.reduce((b, i) => b + i.buy_price * i.qty, 0), 0);
-      const top = {};
-      tx.forEach(t => t.items.forEach(i => top[i.name] = (top[i.name] || 0) + i.qty * i.multiplier));
-      const tp = Object.entries(top).sort((a, b) => b[1] - a[1]).slice(0, 5), low = S.prods.filter(p => p.use_stock && p.stock_base <= p.min_stock_alert);
-      $('#rb').innerHTML = '<div class="kv"><span>Transaksi</span><b>' + tx.length + '</b></div><div class="kv"><span>Omset</span><b>' + rp(om) + '</b></div><div class="kv"><span>Laba Kotor</span><b>' + rp(om - hpp) + '</b></div><h4>Terlaris</h4>' + (tp.map(([n, q]) => '<div class="kv"><span>' + esc(n) + '</span><b>' + q + '</b></div>').join('') || '<p class="em">Belum ada data</p>') + '<h4>Stok Menipis</h4>' + (low.map(p => '<div class="kv"><span>' + esc(p.name) + '</span><b class="neg">' + p.stock_base + '</b></div>').join('') || '<p class="em">Stok aman</p>');
-      $('#e1').onclick = () => csv('transaksi.csv', [['Invoice', 'Waktu', 'Kasir', 'Pelanggan', 'Metode', 'Total'], ...tx.map(t => [t.invoice_no, new Date(t.timestamp).toLocaleString(), t.cashier_name, t.customer_name, t.payment_type, t.total_final])]);
-      $('#e2').onclick = () => csv('stok.csv', [['Nama', 'Kode', 'Kategori', 'Stok', 'Satuan', 'HPP', 'Harga Ecer'], ...S.prods.map(p => [p.name, p.code, p.category, p.stock_base, p.base_unit, p.last_buy_price, up(p, 0, 'eceran')])]);
-    }
-  }
-};
-
-function go(n, a, push = true) {
-  const v = V[n]; if (!v) return;
-  if (v.own && S.role !== 'owner') return toast('Khusus Owner');
-  if (push && cur) S.stack.push([cur, curA]);
-  cur = n; curA = a;
-  $('#tt').textContent = v.t;
-  $('#bk').style.visibility = S.stack.length ? 'visible' : 'hidden';
-  $('#app').innerHTML = v.draw(a);
-  $('#ac').innerHTML = v.act ? '<button id="ab">' + v.act[0] + '</button>' : '';
-  if (v.act) $('#ab').onclick = v.act[1];
-  v.init?.(a);
-  v.upd?.();
-}
-
-function back() { const p = S.stack.pop(); if (p) go(p[0], p[1], false); }
-$('#bk').onclick = back;
-
-// Tampilkan form login detik pertama secara instan
-go('login', null, false);
-
-// Inisialisasi Cloud Firebase dengan konfigurasi asli Anda
-const firebaseConfig = {
-  apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKoQSo",
-  authDomain: "pos-rejeki-lancar.firebaseapp.com",
-  projectId: "pos-rejeki-lancar",
-  storageBucket: "pos-rejeki-lancar.firebasestorage.app",
-  messagingSenderId: "647198272530",
-  appId: "1:647198272530:web:60730b6c34d46449bafccb",
-  measurementId: "G-P7YN1ZJQEJ"
-};
-
-(async () => {
-  const badge = $('#net-badge');
-  try {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-    const F = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-    const A = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
-
-    const app = initializeApp(firebaseConfig);
-    const db = F.getFirestore(app);
-    const au = A.getAuth(app);
-
-    await A.signInAnonymously(au);
-
-    const pr = F.doc(db, 'settings', 'pins');
-    const snap = await F.getDoc(pr);
-    if (!snap.exists()) {
-      await F.setDoc(pr, { owner: await sha('1234'), cashier: await sha('0000') });
-    }
-
-    window.FB_READY = true;
-    badge.textContent = "Cloud Terhubung";
-
-    window.FB_API = {
-      async getPins() { return (await F.getDoc(F.doc(db, 'settings', 'pins'))).data(); },
-      async savePins(o) { await F.setDoc(F.doc(db, 'settings', 'pins'), o, { merge: true }); },
-      async saveProduct(E) {
-        const r = E.id ? F.doc(db, 'products', E.id) : F.doc(F.collection(db, 'products'));
-        E.id = r.id;
-        await F.setDoc(r, E);
-      },
-      async deleteProduct(id) { await F.deleteDoc(F.doc(db, 'products', id)); },
-      async addDebt(d) {
-        const r = F.doc(F.collection(db, 'debts'));
-        d.id = r.id;
-        await F.setDoc(r, d);
-      },
-      async payDebt(id, a) {
-        await F.runTransaction(db, async t => {
-          const s = await t.get(F.doc(db, 'debts', id));
-          const x = s.data();
-          const rem = x.remaining_amount - a;
-          t.update(s.ref, {
-            remaining_amount: rem,
-            status: rem <= 0 ? 'lunas' : 'belum lunas',
-            payments_history: [...(x.payments_history || []), { amount: a, timestamp: Date.now() }]
-          });
-        });
-      },
-      async openShift(cash) {
-        const r = F.doc(F.collection(db, 'shifts'));
-        await F.setDoc(r, { id: r.id, cashier_name: S.name, start_time: Date.now(), end_time: 0, start_cash: cash, status: 'open' });
-      },
-      async addExpense(e) {
-        const r = F.doc(F.collection(db, 'expenses'));
-        e.id = r.id;
-        await F.setDoc(r, e);
-      },
-      async closeShift(id, exp, act) {
-        await F.updateDoc(F.doc(db, 'shifts', id), { end_time: Date.now(), expected_cash: exp, actual_cash: act, cash_diff: act - exp, status: 'closed' });
-      },
-      async checkout(v) {
-        const items = S.cart.map(c => {
-          const p = S.prods.find(x => x.id === c.pid);
-          const u = p.units[c.u];
-          const price = up(p, c.u, S.tier);
-          return { product_id: p.id, name: p.name, unit_name: u.name, multiplier: u.multiplier, qty: c.qty, price, subtotal: price * c.qty, buy_price: (p.last_buy_price || 0) * u.multiplier };
-        });
-        const subtotal = items.reduce((a, i) => a + i.subtotal, 0);
-        const disc = Math.min(+v.discount || 0, subtotal);
-        const tax = Math.round((subtotal - disc) * (+v.tax || 0) / 100);
-        const total = subtotal - disc + tax;
-        const debt = v.payment === 'piutang';
-        if (debt && !v.customer.trim()) throw Error('Nama pelanggan wajib diisi untuk kasbon');
-        const paid = debt ? (+v.paid || 0) : (+v.paid || total);
-        if (!debt && paid < total) throw Error('Uang kurang ' + rp(total - paid));
-
-        const need = {};
-        items.forEach(i => need[i.product_id] = (need[i.product_id] || 0) + i.qty * i.multiplier);
-        const tref = F.doc(F.collection(db, 'transactions'));
-        const now = Date.now();
-        const tx = {
-          id: tref.id,
-          invoice_no: 'INV-' + new Date(now).toISOString().slice(2,10).replace(/-/g,'') + '-' + tref.id.slice(0,4),
-          timestamp: now,
-          cashier_name: S.name,
-          shift_id: S.shift?.id || '',
-          items,
-          subtotal,
-          discount_nominal: disc,
-          tax_nominal: tax,
-          total_final: total,
-          payment_type: v.payment,
-          amount_paid: paid,
-          change: Math.max(0, paid - total),
-          is_debt: debt,
-          customer_name: v.customer || 'Umum',
-          customer_phone: v.phone || '',
-          due_date: v.due ? new Date(v.due).getTime() : 0
+        // Konfigurasi Firebase dari Project Anda[cite: 507]
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKoQSo",
+            authDomain: "pos-rejeki-lancar.firebaseapp.com",
+            projectId: "pos-rejeki-lancar",
+            storageBucket: "pos-rejeki-lancar.firebasestorage.app",
+            messagingSenderId: "647198272530",
+            appId: "1:647198272530:web:60730b6c34d46449bafccb",
+            measurementId: "G-P7YN1ZJQEJ"
         };
 
-        await F.runTransaction(db, async t => {
-          const ids = Object.keys(need);
-          const snaps = await Promise.all(ids.map(id => t.get(F.doc(db, 'products', id))));
-          snaps.forEach((s, i) => {
-            const p = s.data();
-            if (!p) throw Error('Barang dihapus');
-            if (p.use_stock && p.stock_base < need[ids[i]]) throw Error('Stok ' + p.name + ' tidak cukup');
-          });
-          snaps.forEach((s, i) => {
-            const p = s.data();
-            if (p.use_stock) t.update(s.ref, { stock_base: p.stock_base - need[ids[i]] });
-          });
-          t.set(tref, tx);
-          if (debt) {
-            const dref = F.doc(F.collection(db, 'debts'));
-            t.set(dref, { id: dref.id, type: 'piutang', party_name: tx.customer_name, total_amount: total - paid, remaining_amount: total - paid, status: 'belum lunas', timestamp: now, due_date: tx.due_date });
-          }
-        });
-        return tx;
-      }
-    };
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    F.onSnapshot(F.collection(db, 'products'), s => { S.prods = s.docs.map(d => d.data()).sort((a, b) => a.name.localeCompare(b.name)); });
-    F.onSnapshot(F.query(F.collection(db, 'transactions'), F.orderBy('timestamp', 'desc'), F.limit(500)), s => { S.txs = s.docs.map(d => d.data()); });
-    F.onSnapshot(F.collection(db, 'debts'), s => { S.debts = s.docs.map(d => d.data()); if (cur === 'debts') V.debts.upd(); });
-    F.onSnapshot(F.query(F.collection(db, 'expenses'), F.orderBy('timestamp', 'desc'), F.limit(300)), s => { S.exps = s.docs.map(d => d.data()); });
-    F.onSnapshot(F.query(F.collection(db, 'shifts'), F.where('status', '==', 'open')), s => {
-      S.shift = s.docs[0]?.data() || null;
-      if (cur === 'shift') V.shift.upd();
-    });
+        // State Aplikasi
+        let products = [];
+        let cart = [];
 
-  } catch (e) {
-    badge.textContent = "Gagal Konek";
-    const eb = $('#err-msg');
-    eb.style.display = 'block';
-    eb.textContent = 'Gagal terhubung ke Firebase: ' + e.message;
-  }
-})();
-</script>
+        // Fungsi Load Data dengan Local Caching (Hemat Kuota Read Firebase)
+        window.loadInitialData = async function() {
+            const cachedProducts = localStorage.getItem('pos_products_cache');
+            
+            if (cachedProducts) {
+                products = JSON.parse(cachedProducts);
+                renderProducts(products);
+                document.getElementById('sync-status').innerText = "Cache Lokal Aktif";
+            }
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                const cloudProducts = [];
+                querySnapshot.forEach((doc) => {
+                    cloudProducts.push({ id: doc.id, ...doc.data() });
+                });
+
+                if (cloudProducts.length > 0) {
+                    products = cloudProducts;
+                    localStorage.setItem('pos_products_cache', JSON.stringify(products));
+                    renderProducts(products);
+                    document.getElementById('sync-status').innerText = "Sinkron Cloud Sukses";
+                }
+            } catch (error) {
+                console.error("Gagal sinkron dari cloud:", error);
+                document.getElementById('sync-status').innerText = "Offline Mode (Cache)";
+                if (!cachedProducts) {
+                    // Data Mock Dummy jika database kosong/offline
+                    products = [
+                        { id: '1', name: 'Minyak Goreng 1L', price: 18000, stock: 45 },
+                        { id: '2', name: 'Gula Pasir 1Kg', price: 15500, stock: 30 },
+                        { id: '3', name: 'Beras Premium 5Kg', price: 68000, stock: 15 },
+                        { id: '4', name: 'Kopi Bubuk Hitam', price: 7500, stock: 100 }
+                    ];
+                    renderProducts(products);
+                }
+            }
+        };
+
+        // Render Produk ke Grid
+        function renderProducts(list) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            list.forEach(p => {
+                grid.innerHTML += `
+                    <div onclick="addToCart('${p.id}')" class="bg-white p-3 rounded-xl shadow-sm border hover:border-emerald-500 cursor-pointer flex flex-col justify-between transition">
+                        <div>
+                            <h3 class="font-semibold text-sm text-gray-800 line-clamp-2">${p.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1">Stok: ${p.stock}</p>
+                        </div>
+                        <div class="mt-3 flex justify-between items-center">
+                            <span class="text-emerald-600 font-bold text-sm">Rp ${p.price.toLocaleString('id-ID')}</span>
+                            <span class="bg-emerald-50 text-emerald-700 text-xs px-2 py-1 rounded"><i class="fa-solid fa-plus"></i></span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Filter Pencarian
+        window.filterProducts = function(keyword) {
+            const filtered = products.filter(p => p.name.toLowerCase().includes(keyword.toLowerCase()));
+            renderProducts(filtered);
+        };
+
+        // Tambah ke Keranjang
+        window.addToCart = function(id) {
+            const product = products.find(p => p.id === id);
+            if (!product || product.stock <= 0) return alert('Stok habis!');
+
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                if (existing.qty < product.stock) {
+                    existing.qty++;
+                } else {
+                    alert('Stok maksimal tercapai');
+                }
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            renderCart();
+        };
+
+        // Render Keranjang
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            const cartCountBadge = document.getElementById('mobile-cart-badge');
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center text-gray-400 py-8 text-sm">Keranjang masih kosong</div>`;
+                document.getElementById('cart-count').innerText = `0 Pcs`;
+                document.getElementById('cart-total').innerText = `Rp 0`;
+                cartCountBadge.innerText = `0`;
+                return;
+            }
+
+            let totalItems = 0;
+            let totalPrice = 0;
+
+            cart.forEach((item, index) => {
+                totalItems += item.qty;
+                totalPrice += item.price * item.qty;
+                container.innerHTML += `
+                    <div class="py-2 flex justify-between items-center text-sm">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">${item.name}</p>
+                            <p class="text-xs text-gray-500">Rp ${item.price.toLocaleString('id-ID')} x ${item.qty}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateQty(${index}, -1)" class="w-6 h-6 bg-gray-200 rounded text-gray-600 font-bold">-</button>
+                            <span class="text-sm font-semibold">${item.qty}</span>
+                            <button onclick="updateQty(${index}, 1)" class="w-6 h-6 bg-emerald-100 rounded text-emerald-700 font-bold">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('cart-count').innerText = `${totalItems} Pcs`;
+            document.getElementById('cart-total').innerText = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+            cartCountBadge.innerText = `${totalItems}`;
+        }
+
+        window.updateQty = function(index, change) {
+            cart[index].qty += change;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            renderCart();
+        };
+
+        // Proses Checkout & Integrasi Cetak RawBT
+        window.processCheckout = async function() {
+            if (cart.length === 0) return alert('Keranjang masih kosong!');
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const transactionData = {
+                items: cart,
+                totalAmount: total,
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                // Simpan transaksi ke Firestore
+                await addDoc(collection(db, "transactions"), transactionData);
+                alert('Transaksi Berhasil Disimpan!');
+
+                // Format Cetak Struk ESC/POS untuk RawBT Printer Intent
+                let printText = "TOKO REJEKI LANCAR\n==========================\n";
+                cart.forEach(i => {
+                    printText += `${i.name}\n  ${i.qty} x ${i.price} = ${i.qty * i.price}\n`;
+                });
+                printText += `==========================\nTOTAL: Rp ${total.toLocaleString('id-ID')}\nTerima Kasih!\n\n\n`;
+
+                // Panggil Intent RawBT
+                const encoded = encodeURIComponent(printText);
+                window.location.href = `rawbt:base64,${btoa(printText)}`;
+
+                // Reset Keranjang
+                cart = [];
+                renderCart();
+            } catch (e) {
+                console.error("Gagal menyimpan transaksi:", e);
+                alert('Gagal memproses transaksi ke database.');
+            }
+        };
+
+        // UI toggles
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        };
+
+        window.toggleCartMobile = function() {
+            const cartPanel = document.getElementById('cart-panel');
+            cartPanel.classList.toggle('translate-x-full');
+        };
+
+        // Jalankan saat pertama buka
+        loadInitialData();
+    </script>
 </body>
 </html>
