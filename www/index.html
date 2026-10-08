@@ -43,6 +43,7 @@
 
                     <div class="text-xs font-bold text-emerald-800 uppercase px-3 mt-5 mb-1">Manajemen</div>
                     <a href="#" onclick="switchView('products')" id="nav-products" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><i class="fa-solid fa-boxes-stacked w-5 text-center"></i><span>Barang & Kategori</span></a>
+                    <a href="#" onclick="switchView('opname')" id="nav-opname" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><i class="fa-solid fa-clipboard-check w-5 text-center"></i><span>Stok Opname</span></a>
                     <a href="#" onclick="switchView('debts')" id="nav-debts" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><i class="fa-solid fa-book-bookmark w-5 text-center"></i><span>Hutang & Piutang</span></a>
                     <a href="#" onclick="switchView('pelanggan')" id="nav-pelanggan" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><i class="fa-solid fa-users w-5 text-center"></i><span>Pelanggan & Supplier</span></a>
                     <a href="#" onclick="switchView('diskon')" id="nav-diskon" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition"><i class="fa-solid fa-tags w-5 text-center"></i><span>Diskon, Pajak & Biaya</span></a>
@@ -58,7 +59,7 @@
                 <div class="p-3 bg-white border-b flex items-center space-x-2">
                     <div class="relative flex-1">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fa-solid fa-search"></i></span>
-                        <input type="text" id="search-box" oninput="filterProducts(this.value)" placeholder="Cari nama barang atau scan barcode..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+                        <input type="text" id="search-box" oninput="filterProducts(this.value)" placeholder="Cari nama barang..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
                     </div>
                     <button onclick="loadInitialData()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm" title="Refresh Data"><i class="fa-solid fa-rotate"></i></button>
                 </div>
@@ -73,7 +74,6 @@
                         </div>
                         <div id="cart-items" class="flex-1 overflow-y-auto p-3 divide-y"><div class="text-center text-gray-400 py-8 text-sm">Keranjang kosong</div></div>
                         <div class="p-4 bg-gray-50 border-t space-y-2">
-                            <!-- Dropdown Diskon Terintegrasi -->
                             <div>
                                 <label class="text-xs font-bold text-gray-500">Pilih Diskon Tersedia</label>
                                 <select id="pos-discount" class="w-full border p-2 rounded text-sm mt-1 focus:ring-2 focus:ring-emerald-500" onchange="renderCart()">
@@ -82,7 +82,8 @@
                             </div>
                             <div class="flex justify-between text-sm text-gray-600 mt-2"><span>Total Item:</span><span id="cart-count">0 Pcs</span></div>
                             <div class="flex justify-between text-lg font-bold text-gray-800"><span>Tagihan:</span><span id="cart-total" class="text-emerald-600">Rp 0</span></div>
-                            <button onclick="processCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow mt-2">BAYAR & CETAK RAWBT</button>
+                            <!-- TOMBOL BUKA MODAL PEMBAYARAN -->
+                            <button onclick="openCheckoutModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow mt-2">LANJUT BAYAR</button>
                         </div>
                     </div>
                 </div>
@@ -97,9 +98,7 @@
                     </div>
                 </div>
                 <div class="flex flex-1 overflow-hidden">
-                    <div class="flex-1 overflow-y-auto p-3">
-                        <div id="po-product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
-                    </div>
+                    <div class="flex-1 overflow-y-auto p-3"><div id="po-product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div></div>
                     <div class="w-full md:w-96 bg-white border-l flex flex-col h-full shadow-lg z-20">
                         <div class="p-3 bg-blue-50 border-b flex justify-between items-center"><h2 class="font-bold text-blue-800"><i class="fa-solid fa-truck-fast mr-2"></i>Draft Pembelian (PO)</h2></div>
                         <div id="po-cart-items" class="flex-1 overflow-y-auto p-3 divide-y"><div class="text-center text-gray-400 py-8 text-sm">Belum ada barang dipilih</div></div>
@@ -135,8 +134,7 @@
                     <div class="w-full max-w-md bg-white rounded-xl shadow-md p-5 mt-4" id="shift-start-panel">
                         <div class="text-center mb-6">
                             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-2"><i class="fa-solid fa-user-tie"></i></div>
-                            <h3 class="font-bold text-lg text-gray-800">Adm (Owner)</h3>
-                            <p class="text-sm text-gray-500" id="shift-status-text">Status: Belum ada shift aktif</p>
+                            <h3 class="font-bold text-lg text-gray-800">Adm (Owner)</h3><p class="text-sm text-gray-500" id="shift-status-text">Status: Belum ada shift aktif</p>
                         </div>
                         <div class="space-y-4" id="shift-form">
                             <div><label class="text-xs font-bold text-gray-500">Pilih Laci Kasir</label><select id="shift-drawer" class="w-full border p-2 rounded-lg mt-1"><option value="Laci Utama">Laci Utama</option><option value="Laci 2">Laci 2</option></select></div>
@@ -167,7 +165,25 @@
                 </div>
             </div>
 
-            <!-- === 6. VIEW HUTANG PIUTANG === -->
+            <!-- === 6. VIEW STOK OPNAME (BARU AKTIF) === -->
+            <div id="view-opname" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
+                <div class="p-4 bg-white border-b flex justify-between items-center">
+                    <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-clipboard-check mr-2 text-emerald-600"></i>Stok Opname (Penyesuaian Fisik)</h2>
+                </div>
+                <div class="p-3 bg-white border-b">
+                    <input type="text" oninput="filterOpname(this.value)" placeholder="Cari nama barang..." class="w-full border p-2 rounded-lg text-sm">
+                </div>
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="bg-white rounded-xl shadow border overflow-hidden">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-100 text-gray-700 uppercase text-xs"><tr><th class="p-3">Nama Barang</th><th class="p-3 text-center">Stok Sistem</th><th class="p-3 text-center">Stok Fisik Real</th><th class="p-3 text-center">Aksi</th></tr></thead>
+                            <tbody id="opname-table-body" class="divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === 7. VIEW HUTANG PIUTANG === -->
             <div id="view-debts" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
                 <div class="p-4 bg-white border-b flex justify-between items-center">
                     <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-book-bookmark mr-2 text-emerald-600"></i>Buku Hutang Piutang</h2>
@@ -183,7 +199,7 @@
                 </div>
             </div>
 
-            <!-- === 7. VIEW PELANGGAN & SUPPLIER === -->
+            <!-- === 8. VIEW PELANGGAN & SUPPLIER === -->
             <div id="view-pelanggan" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
                 <div class="p-4 bg-white border-b flex justify-between items-center">
                     <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-users mr-2 text-emerald-600"></i>Buku Kontak</h2>
@@ -199,7 +215,7 @@
                 </div>
             </div>
 
-            <!-- === 8. VIEW DISKON, PAJAK, BIAYA === -->
+            <!-- === 9. VIEW DISKON, PAJAK, BIAYA === -->
             <div id="view-diskon" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
                 <div class="p-4 bg-white border-b flex justify-between items-center">
                     <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-tags mr-2 text-emerald-600"></i>Master Diskon & Biaya</h2>
@@ -215,25 +231,21 @@
                 </div>
             </div>
 
-            <!-- === 9. VIEW LAPORAN TOKO (DENGAN LABA RUGI) === -->
+            <!-- === 10. VIEW LAPORAN TOKO === -->
             <div id="view-reports" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
                 <div class="p-4 bg-white border-b flex justify-between items-center">
                     <h2 class="font-bold text-gray-800 text-lg"><i class="fa-solid fa-chart-pie mr-2 text-emerald-600"></i>Laporan Penjualan</h2>
                     <button onclick="loadTransactions()" class="bg-emerald-100 text-emerald-800 px-3 py-2 rounded-lg text-sm font-semibold"><i class="fa-solid fa-rotate mr-1"></i> Refresh Data</button>
                 </div>
-                <!-- KARTU RINGKASAN LABA RUGI -->
                 <div class="p-4 grid grid-cols-3 gap-3 bg-white border-b">
                     <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 text-center shadow-sm">
-                        <p class="text-xs text-blue-600 font-bold uppercase">Total Transaksi</p>
-                        <p class="text-xl font-bold text-blue-800 mt-1" id="rep-trx">0</p>
+                        <p class="text-xs text-blue-600 font-bold uppercase">Total Transaksi</p><p class="text-xl font-bold text-blue-800 mt-1" id="rep-trx">0</p>
                     </div>
                     <div class="bg-green-50 p-3 rounded-lg border border-green-100 text-center shadow-sm">
-                        <p class="text-xs text-green-600 font-bold uppercase">Omzet (Kotor)</p>
-                        <p class="text-xl font-bold text-green-800 mt-1" id="rep-omzet">Rp 0</p>
+                        <p class="text-xs text-green-600 font-bold uppercase">Omzet (Kotor)</p><p class="text-xl font-bold text-green-800 mt-1" id="rep-omzet">Rp 0</p>
                     </div>
                     <div class="bg-orange-50 p-3 rounded-lg border border-orange-100 text-center shadow-sm">
-                        <p class="text-xs text-orange-600 font-bold uppercase">Keuntungan (Laba)</p>
-                        <p class="text-xl font-bold text-orange-800 mt-1" id="rep-laba">Rp 0</p>
+                        <p class="text-xs text-orange-600 font-bold uppercase">Keuntungan (Laba)</p><p class="text-xl font-bold text-orange-800 mt-1" id="rep-laba">Rp 0</p>
                     </div>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4">
@@ -246,7 +258,7 @@
                 </div>
             </div>
 
-            <!-- === 10. VIEW PENGATURAN & PRINTER === -->
+            <!-- === 11. VIEW PENGATURAN === -->
             <div id="view-pengaturan" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-gray-50 hidden">
                 <div class="p-4 bg-emerald-800 text-white border-b"><h2 class="font-bold text-lg"><i class="fa-solid fa-gear mr-2"></i>Pengaturan Sistem Toko</h2></div>
                 <div class="flex-1 overflow-y-auto p-4 flex justify-center">
@@ -273,23 +285,55 @@
         </button>
     </div>
 
-    <!-- SEMUA MODAL TAMBAH DATA -->
-    <!-- MODAL BARANG: Ditambahkan Kolom Harga Modal (HPP) -->
-    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <!-- SEMUA MODAL POPUP -->
+    
+    <!-- MODAL CHECKOUT KASIR (BARU AKTIF) -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Tambah Barang Baru</span><button onclick="closeAddProductModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+            <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Pembayaran Kasir</span><button onclick="closeCheckoutModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div>
             <div class="p-4 space-y-3">
-                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Barang</label><input type="text" id="input-name" class="w-full border p-2 rounded-lg text-sm" placeholder="Contoh: Sabun Mandi 90g"></div>
-                <!-- BARU: Kolom Harga Beli (Modal) -->
-                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Harga Beli / Modal (HPP)</label><input type="number" id="input-buyprice" class="w-full border p-2 rounded-lg text-sm" placeholder="Contoh: 3000"></div>
-                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Harga Jual (Rp)</label><input type="number" id="input-price" class="w-full border p-2 rounded-lg text-sm" placeholder="Contoh: 5000"></div>
-                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Stok Awal</label><input type="number" id="input-stock" class="w-full border p-2 rounded-lg text-sm" placeholder="Contoh: 50"></div>
-                <button onclick="saveNewProduct()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN BARANG</button>
+                <div class="text-center mb-4">
+                    <p class="text-sm text-gray-500">Total Tagihan (Setelah Diskon)</p>
+                    <p class="text-3xl font-bold text-emerald-600" id="checkout-total-display">Rp 0</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Metode Pembayaran</label>
+                    <select id="checkout-method" class="w-full border p-2 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500">
+                        <option value="Cash">Cash (Tunai)</option><option value="Transfer Bank">Transfer Bank</option><option value="QRIS">QRIS</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Uang Diterima (Rp)</label>
+                    <input type="number" id="checkout-paid" class="w-full border p-2 rounded-lg text-3xl font-bold focus:ring-2 focus:ring-emerald-500 text-center" placeholder="0" oninput="calculateChange()">
+                </div>
+                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
+                    <span class="text-sm font-bold text-gray-600">Kembalian Kasir:</span>
+                    <span class="text-xl font-bold text-orange-500" id="checkout-change">Rp 0</span>
+                </div>
+                <div class="border-t pt-3 mt-3">
+                    <label class="flex items-center space-x-2 text-sm font-bold text-gray-700 cursor-pointer">
+                        <input type="checkbox" id="checkout-is-debt" class="w-4 h-4 text-emerald-600" onchange="toggleDebtFields()">
+                        <span>Jadikan Piutang (Kasbon)</span>
+                    </label>
+                </div>
+                <div id="checkout-debt-fields" class="hidden space-y-3 bg-red-50 p-3 rounded-lg border border-red-100 mt-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-red-600 mb-1">Pilih Pelanggan Kasbon</label>
+                        <select id="checkout-customer" class="w-full border p-2 rounded-lg text-sm border-red-200">
+                            <option value="">-- Pilih Pelanggan --</option>
+                        </select>
+                    </div>
+                    <p class="text-xs text-red-500">*Jika uang diterima kurang dari tagihan, sisa akan otomatis masuk Buku Piutang.</p>
+                </div>
+                <button onclick="finalizeCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold text-sm mt-4 shadow">SELESAIKAN & CETAK STRUK</button>
             </div>
         </div>
     </div>
-    
-    <div id="debt-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"><div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Catat Hutang/Piutang</span><button onclick="closeAddDebtModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-4 space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Pihak</label><input type="text" id="debt-name" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Tipe</label><select id="debt-type" class="w-full border p-2 rounded-lg text-sm"><option value="piutang">Piutang</option><option value="hutang">Hutang</option></select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nominal</label><input type="number" id="debt-amount" class="w-full border p-2 rounded-lg text-sm"></div><button onclick="saveNewDebt()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN</button></div></div></div>
+
+    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"><div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Tambah Barang Baru</span><button onclick="closeAddProductModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-4 space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Barang</label><input type="text" id="input-name" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Harga Beli / Modal (HPP)</label><input type="number" id="input-buyprice" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Harga Jual (Rp)</label><input type="number" id="input-price" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Stok Awal</label><input type="number" id="input-stock" class="w-full border p-2 rounded-lg text-sm"></div><button onclick="saveNewProduct()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN BARANG</button></div></div>
+    </div>
+    <div id="debt-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"><div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Catat Hutang/Piutang</span><button onclick="closeAddDebtModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-4 space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Pihak</label><input type="text" id="debt-name" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Tipe</label><select id="debt-type" class="w-full border p-2 rounded-lg text-sm"><option value="piutang">Piutang</option><option value="hutang">Hutang</option></select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nominal (Rp)</label><input type="number" id="debt-amount" class="w-full border p-2 rounded-lg text-sm"></div><button onclick="saveNewDebt()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN</button></div></div></div>
     <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"><div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Tambah Kontak</span><button onclick="closeContactModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-4 space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama</label><input type="text" id="contact-name" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Telepon</label><input type="tel" id="contact-phone" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Tipe</label><select id="contact-type" class="w-full border p-2 rounded-lg text-sm"><option value="Pelanggan">Pelanggan</option><option value="Supplier">Supplier</option></select></div><button onclick="saveContact()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN</button></div></div></div>
     <div id="discount-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"><div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Tambah Diskon</span><button onclick="closeDiscountModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-4 space-y-3"><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Diskon</label><input type="text" id="discount-name" class="w-full border p-2 rounded-lg text-sm"></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Tipe</label><select id="discount-type" class="w-full border p-2 rounded-lg text-sm"><option value="persen">Persen (%)</option><option value="rupiah">Rupiah (Rp)</option></select></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Besaran</label><input type="number" id="discount-amount" class="w-full border p-2 rounded-lg text-sm"></div><button onclick="saveDiscount()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN</button></div></div></div>
 
@@ -310,13 +354,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let products = [], cart = [], poCart = [], activeShiftId = null;
-        window.currentCartTotal = 0; // Menyimpan hitungan akhir setelah diskon
-        window.currentCartHpp = 0;   // Menyimpan total harga modal
+        let products = [], cart = [], poCart = [], contacts = [];
+        window.currentCartTotal = 0; 
+        window.currentCartHpp = 0;
 
-        // ==== MODUL NAVIGASI ====
-        const allViews = ['pos','products','reports','debts','pembelian','keuangan','shift','pelanggan','diskon','pengaturan'];
-        const viewTitles = { pos:'Kasir (POS)', products:'Manajemen Barang', reports:'Laporan Toko', debts:'Hutang & Piutang', pembelian:'Pembelian Supplier', keuangan:'Kas Keuangan', shift:'Shift & Cashdrawer', pelanggan:'Buku Kontak', diskon:'Master Biaya', pengaturan:'Pengaturan Sistem' };
+        // ==== MODUL NAVIGASI UI ====
+        const allViews = ['pos','products','opname','reports','debts','pembelian','keuangan','shift','pelanggan','diskon','pengaturan'];
+        const viewTitles = { pos:'Kasir (POS)', products:'Manajemen Barang', opname:'Stok Opname Fisik', reports:'Laporan Toko', debts:'Hutang & Piutang', pembelian:'Pembelian Supplier', keuangan:'Kas Keuangan', shift:'Shift & Cashdrawer', pelanggan:'Buku Kontak', diskon:'Master Biaya', pengaturan:'Pengaturan Sistem' };
 
         window.switchView = function(viewName) {
             allViews.forEach(v => {
@@ -330,29 +374,34 @@
             document.getElementById('floating-cart-btn').style.display = (viewName === 'pos') ? 'block' : 'none';
 
             if (viewName === 'products') renderInventoryTable();
+            if (viewName === 'opname') renderOpnameTable();
             if (viewName === 'reports') loadTransactions();
-            if (viewName === 'diskon') loadDiscounts();
+            if (viewName === 'debts') loadDebts();
+            if (viewName === 'pelanggan') loadContacts();
             
-            const sidebar = document.getElementById('sidebar');
-            if(window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
+            if(window.innerWidth < 768) toggleSidebar();
         };
 
         window.toggleSidebar = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
         window.toggleCartMobile = () => document.getElementById('cart-panel').classList.toggle('translate-x-full');
 
+        // ==== INIT DATA LOKAL ====
         window.loadInitialData = async function() {
-            const cachedProducts = localStorage.getItem('pos_products_cache');
-            if (cachedProducts) { products = JSON.parse(cachedProducts); renderProducts(products); renderPOProducts(products); document.getElementById('sync-status').innerText = "Cache Aktif"; }
             try {
                 const qSnap = await getDocs(collection(db, "products"));
                 products = qSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                localStorage.setItem('pos_products_cache', JSON.stringify(products));
-                renderProducts(products); renderPOProducts(products); document.getElementById('sync-status').innerText = "Online";
-                loadDiscounts(); // Load opsi diskon di keranjang POS
+                renderProducts(products); renderPOProducts(products); 
+                if(!document.getElementById('view-opname').classList.contains('hidden')) renderOpnameTable();
+                
+                const cSnap = await getDocs(collection(db, "contacts"));
+                contacts = cSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                loadDiscounts(); 
+                document.getElementById('sync-status').innerText = "Online";
             } catch (error) { document.getElementById('sync-status').innerText = "Offline Mode"; }
         };
 
-        // ==== MODUL 1: KASIR (POS) & CHECKOUT ====
+        // ==== MODUL 1: KASIR (POS) & CHECKOUT LANJUTAN ====
         function renderProducts(list) {
             const grid = document.getElementById('product-grid'); grid.innerHTML = '';
             list.forEach(p => { grid.innerHTML += `<div onclick="addToCart('${p.id}')" class="bg-white p-3 rounded-xl shadow-sm border hover:border-emerald-500 cursor-pointer flex flex-col justify-between"><h3 class="font-semibold text-sm text-gray-800 line-clamp-2">${p.name}</h3><p class="text-xs text-gray-500 mt-1">Stok: ${p.stock}</p><div class="mt-3 flex justify-between items-center"><span class="text-emerald-600 font-bold text-sm">Rp ${Number(p.price).toLocaleString('id-ID')}</span><span class="bg-emerald-50 text-emerald-700 text-xs px-2 py-1 rounded"><i class="fa-solid fa-plus"></i></span></div></div>`; });
@@ -364,143 +413,144 @@
             const container = document.getElementById('cart-items'); container.innerHTML = '';
             if (cart.length === 0) {
                 container.innerHTML = `<div class="text-center text-gray-400 py-8 text-sm">Keranjang kosong</div>`;
-                document.getElementById('cart-count').innerText = `0 Pcs`; document.getElementById('cart-total').innerText = `Rp 0`; document.getElementById('mobile-cart-badge').innerText = `0`; return;
+                document.getElementById('cart-count').innerText = `0 Pcs`; document.getElementById('cart-total').innerText = `Rp 0`; return;
             }
             let tQty = 0, tPrice = 0, tHpp = 0;
             cart.forEach((i, idx) => {
-                tQty += i.qty; 
-                tPrice += i.price * i.qty; 
-                tHpp += (i.buyPrice || 0) * i.qty; // Hitung Harga Modal
+                tQty += i.qty; tPrice += i.price * i.qty; tHpp += (i.buyPrice || 0) * i.qty;
                 container.innerHTML += `<div class="py-2 flex justify-between items-center text-sm"><div class="flex-1"><p class="font-medium text-gray-800">${i.name}</p><p class="text-xs text-gray-500">Rp ${Number(i.price).toLocaleString('id-ID')} x ${i.qty}</p></div><div class="flex items-center space-x-2"><button onclick="updateQty(${idx}, -1)" class="w-6 h-6 bg-gray-200 rounded font-bold">-</button><span class="text-sm font-semibold">${i.qty}</span><button onclick="updateQty(${idx}, 1)" class="w-6 h-6 bg-emerald-100 text-emerald-700 rounded font-bold">+</button></div></div>`;
             });
-
-            // TERAPKAN DISKON JIKA ADA
-            const discVal = document.getElementById('pos-discount').value.split('|');
-            const dType = discVal[0]; const dAmt = Number(discVal[1]) || 0;
-            let finalTotal = tPrice;
-            if (dType === 'persen') { finalTotal = tPrice - (tPrice * (dAmt / 100)); } 
-            else if (dType === 'rupiah') { finalTotal = tPrice - dAmt; }
-            if (finalTotal < 0) finalTotal = 0;
-
-            window.currentCartTotal = finalTotal;
-            window.currentCartHpp = tHpp;
-
-            document.getElementById('cart-count').innerText = `${tQty} Pcs`; 
-            document.getElementById('cart-total').innerText = `Rp ${finalTotal.toLocaleString('id-ID')}`; 
-            document.getElementById('mobile-cart-badge').innerText = `${tQty}`;
+            const dVal = document.getElementById('pos-discount').value.split('|');
+            let fTotal = tPrice;
+            if (dVal[0] === 'persen') fTotal -= (tPrice * (Number(dVal[1]) / 100)); else if (dVal[0] === 'rupiah') fTotal -= Number(dVal[1]);
+            window.currentCartTotal = fTotal < 0 ? 0 : fTotal; window.currentCartHpp = tHpp;
+            document.getElementById('cart-count').innerText = `${tQty} Pcs`; document.getElementById('cart-total').innerText = `Rp ${window.currentCartTotal.toLocaleString('id-ID')}`;
         };
         window.updateQty = (idx, c) => { cart[idx].qty += c; if (cart[idx].qty <= 0) cart.splice(idx, 1); renderCart(); };
 
-        window.processCheckout = async function() {
-            if (cart.length === 0) return alert('Kosong!');
+        // LOGIKA CHECKOUT KASIR (MODAL)
+        window.openCheckoutModal = function() {
+            if (cart.length === 0) return alert('Keranjang kosong!');
+            document.getElementById('checkout-total-display').innerText = `Rp ${window.currentCartTotal.toLocaleString('id-ID')}`;
+            document.getElementById('checkout-paid').value = window.currentCartTotal;
+            document.getElementById('checkout-is-debt').checked = false;
+            
+            const custSelect = document.getElementById('checkout-customer');
+            custSelect.innerHTML = '<option value="">-- Pilih Pelanggan --</option>';
+            contacts.filter(c => c.type === 'Pelanggan').forEach(c => custSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+            
+            toggleDebtFields(); calculateChange();
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        };
+        window.closeCheckoutModal = () => document.getElementById('checkout-modal').classList.add('hidden');
+        
+        window.calculateChange = function() {
+            const paid = Number(document.getElementById('checkout-paid').value) || 0;
+            const change = paid - window.currentCartTotal;
+            document.getElementById('checkout-change').innerText = `Rp ${change > 0 ? change.toLocaleString('id-ID') : 0}`;
+        };
+
+        window.toggleDebtFields = function() {
+            const isDebt = document.getElementById('checkout-is-debt').checked;
+            const fields = document.getElementById('checkout-debt-fields');
+            if (isDebt) { fields.classList.remove('hidden'); document.getElementById('checkout-paid').value = 0; } 
+            else { fields.classList.add('hidden'); document.getElementById('checkout-paid').value = window.currentCartTotal; }
+            calculateChange();
+        };
+
+        window.finalizeCheckout = async function() {
+            const isDebt = document.getElementById('checkout-is-debt').checked;
+            const paid = Number(document.getElementById('checkout-paid').value) || 0;
+            const method = document.getElementById('checkout-method').value;
+            const customer = document.getElementById('checkout-customer').value;
+
+            if (isDebt && !customer) return alert('Pilih pelanggan untuk mencatat piutang kasbon!');
+            if (!isDebt && paid < window.currentCartTotal) return alert('Uang pembayaran kurang!');
+
             try {
-                // SIMPAN TRANSAKSI (Dengan perhitungan laba)
                 const profit = window.currentCartTotal - window.currentCartHpp;
-                await addDoc(collection(db, "transactions"), { 
-                    items: cart, 
-                    totalAmount: window.currentCartTotal, 
-                    totalHpp: window.currentCartHpp,
-                    profit: profit, // Simpan Laba Bersih
-                    createdAt: serverTimestamp() 
-                });
+                await addDoc(collection(db, "transactions"), { items: cart, totalAmount: window.currentCartTotal, profit: profit, method: method, paid: paid, isDebt: isDebt, customer: customer, createdAt: serverTimestamp() });
+                
+                if (isDebt) {
+                    const debtAmount = window.currentCartTotal - paid;
+                    await addDoc(collection(db, "debts"), { name: customer, type: 'piutang', amount: debtAmount, status: 'Belum Lunas', createdAt: serverTimestamp() });
+                }
+                for (let item of cart) { await updateDoc(doc(db, "products", item.id), { stock: item.stock - item.qty }); }
 
-                // UPDATE STOK BARANG DI FIREBASE
-                for (let item of cart) { const pRef = doc(db, "products", item.id); await updateDoc(pRef, { stock: item.stock - item.qty }); }
-
-                // CETAK RAWBT
-                const namaToko = document.getElementById('set-toko').value || "REJEKI LANCAR";
-                let printText = `   ${namaToko}   \n==========================\n`;
+                let printText = `   REJEKI LANCAR   \n==========================\n`;
                 cart.forEach(i => printText += `${i.name}\n  ${i.qty} x ${i.price} = ${i.qty * i.price}\n`);
-                printText += `==========================\nTOTAL: Rp ${window.currentCartTotal.toLocaleString('id-ID')}\nTerima Kasih!\n\n\n`;
+                printText += `==========================\nTOTAL  : Rp ${window.currentCartTotal.toLocaleString('id-ID')}\nDIBAYAR: Rp ${paid.toLocaleString('id-ID')} (${method})\n`;
+                if(isDebt) printText += `SISA PIUTANG: Rp ${(window.currentCartTotal - paid).toLocaleString('id-ID')}\n`;
+                else printText += `KEMBALI: Rp ${(paid > window.currentCartTotal ? paid - window.currentCartTotal : 0).toLocaleString('id-ID')}\n`;
+                printText += `\nTerima Kasih!\n\n\n`;
                 
                 window.location.href = `rawbt:base64,${btoa(printText)}`; 
-                cart = []; document.getElementById('pos-discount').value = "0|0"; renderCart(); loadInitialData();
+                cart = []; document.getElementById('pos-discount').value = "0|0"; renderCart(); closeCheckoutModal(); loadInitialData();
             } catch (e) { alert('Gagal.'); }
         };
 
-        // ==== MODUL 2: PRODUK & HPP (HARGA MODAL) ====
+        // ==== MODUL 2: STOK OPNAME (PENYESUAIAN FISIK) ====
+        window.renderOpnameTable = function(list = products) {
+            const tbody = document.getElementById('opname-table-body'); tbody.innerHTML = '';
+            list.forEach(p => {
+                tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-3 font-medium">${p.name}</td><td class="p-3 text-center font-bold text-blue-600">${p.stock}</td><td class="p-3 text-center w-32"><input type="number" id="fisik-${p.id}" class="w-full border p-1 rounded text-center" value="${p.stock}"></td><td class="p-3 text-center"><button onclick="adjustStock('${p.id}')" class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-xs font-bold hover:bg-emerald-200 shadow-sm">SESUAIKAN</button></td></tr>`;
+            });
+        };
+        window.filterOpname = (k) => renderOpnameTable(products.filter(p => p.name.toLowerCase().includes(k.toLowerCase())));
+        window.adjustStock = async function(id) {
+            const p = products.find(x => x.id === id);
+            const physical = Number(document.getElementById(`fisik-${id}`).value);
+            if (isNaN(physical) || physical < 0) return alert('Input tidak valid');
+            if (physical === p.stock) return alert('Stok fisik sama dengan sistem, aman.');
+            try { await updateDoc(doc(db, "products", id), { stock: physical }); alert(`Stok berhasil disesuaikan!`); loadInitialData(); } catch (e) { alert('Gagal'); }
+        };
+
+        // ==== MODUL LAINNYA ====
         window.openAddProductModal = () => document.getElementById('product-modal').classList.remove('hidden');
         window.closeAddProductModal = () => document.getElementById('product-modal').classList.add('hidden');
         window.saveNewProduct = async function() {
-            const name = document.getElementById('input-name').value;
-            const buyPrice = Number(document.getElementById('input-buyprice').value) || 0; // HPP
-            const price = Number(document.getElementById('input-price').value);
-            const stock = Number(document.getElementById('input-stock').value);
-            if (!name || !price || isNaN(stock)) return alert('Isi form dengan benar!');
-            try {
-                const docRef = await addDoc(collection(db, "products"), { name, buyPrice, price, stock, createdAt: serverTimestamp() });
-                products.push({ id: docRef.id, name, buyPrice, price, stock }); localStorage.setItem('pos_products_cache', JSON.stringify(products));
-                renderProducts(products); renderInventoryTable(); closeAddProductModal();
-            } catch (e) { alert('Gagal.'); }
+            const name = document.getElementById('input-name').value, buyPrice = Number(document.getElementById('input-buyprice').value)||0, price = Number(document.getElementById('input-price').value), stock = Number(document.getElementById('input-stock').value);
+            if (!name || !price || isNaN(stock)) return alert('Isi form!');
+            await addDoc(collection(db, "products"), { name, buyPrice, price, stock, createdAt: serverTimestamp() }); closeAddProductModal(); loadInitialData();
         };
-        window.deleteProductFromCloud = async function(id) {
-            if (!confirm('Hapus barang ini?')) return;
-            try { await deleteDoc(doc(db, "products", id)); products = products.filter(p => p.id !== id); localStorage.setItem('pos_products_cache', JSON.stringify(products)); renderInventoryTable(); renderProducts(products); } catch (e) {}
-        };
+        window.deleteProductFromCloud = async function(id) { if(!confirm('Hapus?')) return; await deleteDoc(doc(db, "products", id)); loadInitialData(); };
         function renderInventoryTable() {
             const tbody = document.getElementById('inventory-table-body'); tbody.innerHTML = '';
-            products.forEach(p => { tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-3 font-medium">${p.name}</td><td class="p-3 text-emerald-600 font-semibold">Rp ${Number(p.price).toLocaleString('id-ID')}</td><td class="p-3">${p.stock} Pcs</td><td class="p-3 text-center"><button onclick="deleteProductFromCloud('${p.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`; });
+            products.forEach(p => { tbody.innerHTML += `<tr><td class="p-3">${p.name}</td><td class="p-3 text-emerald-600 font-semibold">Rp ${Number(p.price).toLocaleString('id-ID')}</td><td class="p-3">${p.stock} Pcs</td><td class="p-3 text-center"><button onclick="deleteProductFromCloud('${p.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`; });
         }
 
-        // ==== MODUL 3: LAPORAN & LABA RUGI ====
         window.loadTransactions = async function() {
             const tbody = document.getElementById('transaction-table-body');
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-gray-400">Memuat data...</td></tr>`;
             try {
                 const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
-                const snap = await getDocs(q); 
-                tbody.innerHTML = '';
-                
+                const snap = await getDocs(q); tbody.innerHTML = '';
                 let tTrx = 0, tOmzet = 0, tLaba = 0;
-
-                if (snap.empty) { tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4">Belum ada transaksi.</td></tr>`; return; }
-                
                 snap.forEach(dSnap => {
-                    const d = dSnap.data();
-                    const dateStr = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleString('id-ID') : 'Baru saja';
-                    
-                    // Rekap Laba Rugi
-                    tTrx++;
-                    tOmzet += Number(d.totalAmount) || 0;
-                    tLaba += Number(d.profit) || 0;
-
-                    let itemsHtml = '<ul class="text-xs text-gray-600 list-disc list-inside">';
-                    if (d.items) d.items.forEach(i => itemsHtml += `<li>${i.name} (${i.qty}x)</li>`);
-                    tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-3 text-xs">${dateStr}</td><td class="p-3">${itemsHtml}</ul></td><td class="p-3 text-emerald-600 font-bold">Rp ${Number(d.totalAmount).toLocaleString('id-ID')}</td></tr>`;
+                    const d = dSnap.data(); const dateStr = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleString('id-ID') : '';
+                    tTrx++; tOmzet += Number(d.totalAmount) || 0; tLaba += Number(d.profit) || 0;
+                    let itemsHtml = '<ul class="text-xs list-disc list-inside">'; if (d.items) d.items.forEach(i => itemsHtml += `<li>${i.name} (${i.qty}x)</li>`);
+                    tbody.innerHTML += `<tr><td class="p-3 text-xs">${dateStr}</td><td class="p-3">${itemsHtml}</ul></td><td class="p-3 font-bold text-emerald-600">Rp ${Number(d.totalAmount).toLocaleString('id-ID')}</td></tr>`;
                 });
-
-                // Update Kartu Laba Rugi di atas tabel
-                document.getElementById('rep-trx').innerText = tTrx;
-                document.getElementById('rep-omzet').innerText = `Rp ${tOmzet.toLocaleString('id-ID')}`;
-                document.getElementById('rep-laba').innerText = `Rp ${tLaba.toLocaleString('id-ID')}`;
+                document.getElementById('rep-trx').innerText = tTrx; document.getElementById('rep-omzet').innerText = `Rp ${tOmzet.toLocaleString('id-ID')}`; document.getElementById('rep-laba').innerText = `Rp ${tLaba.toLocaleString('id-ID')}`;
             } catch (e) {}
         };
 
-        // ==== MODUL 4: DISKON (Master Diskon) ====
-        window.openDiscountModal = () => document.getElementById('discount-modal').classList.remove('hidden');
-        window.closeDiscountModal = () => document.getElementById('discount-modal').classList.add('hidden');
         window.loadDiscounts = async function() {
-            const tbody = document.getElementById('discount-table-body');
-            const posSelect = document.getElementById('pos-discount'); // Dropdown di POS
-            tbody.innerHTML = ''; posSelect.innerHTML = '<option value="0|0">Tidak ada diskon</option>';
+            const tbody = document.getElementById('discount-table-body'), posSelect = document.getElementById('pos-discount');
+            if(tbody) tbody.innerHTML = ''; posSelect.innerHTML = '<option value="0|0">Tidak ada diskon</option>';
             try {
                 const snap = await getDocs(collection(db, "discounts"));
                 snap.forEach(docSnap => {
                     const d = docSnap.data(); const valText = d.type === 'persen' ? `${d.amount}%` : `Rp ${Number(d.amount).toLocaleString('id-ID')}`;
-                    tbody.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-3">${d.name}</td><td class="p-3 capitalize">${d.type}</td><td class="p-3 font-bold text-emerald-600">${valText}</td><td class="p-3 text-center"><button onclick="deleteDiscount('${docSnap.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-                    posSelect.innerHTML += `<option value="${d.type}|${d.amount}">${d.name} (${valText})</option>`; // Integrasi ke Kasir
+                    if(tbody) tbody.innerHTML += `<tr><td class="p-3">${d.name}</td><td class="p-3 capitalize">${d.type}</td><td class="p-3 text-emerald-600 font-bold">${valText}</td><td class="p-3 text-center"><button onclick="deleteDoc(doc(db, 'discounts', '${docSnap.id}')); loadDiscounts();" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+                    posSelect.innerHTML += `<option value="${d.type}|${d.amount}">${d.name} (${valText})</option>`;
                 });
-            } catch (e) {}
+            } catch(e){}
         };
-        window.saveDiscount = async function() {
-            const name = document.getElementById('discount-name').value, type = document.getElementById('discount-type').value, amount = Number(document.getElementById('discount-amount').value);
-            if(!name || isNaN(amount)) return alert('Data tidak valid!');
-            await addDoc(collection(db, "discounts"), { name, type, amount, createdAt: serverTimestamp() });
-            closeDiscountModal(); loadDiscounts();
-        };
-        window.deleteDiscount = async function(id) { if(!confirm('Hapus diskon?')) return; await deleteDoc(doc(db, "discounts", id)); loadDiscounts(); };
+        window.openDiscountModal = () => document.getElementById('discount-modal').classList.remove('hidden');
+        window.closeDiscountModal = () => document.getElementById('discount-modal').classList.add('hidden');
+        window.saveDiscount = async function() { const n = document.getElementById('discount-name').value, t = document.getElementById('discount-type').value, a = Number(document.getElementById('discount-amount').value); await addDoc(collection(db, "discounts"), { name:n, type:t, amount:a, createdAt: serverTimestamp() }); closeDiscountModal(); loadDiscounts(); };
 
-        // ==== MODUL PEMBELIAN PO (Restock Ringkas) ====
         function renderPOProducts(list) {
             const grid = document.getElementById('po-product-grid'); grid.innerHTML = '';
             list.forEach(p => { grid.innerHTML += `<div onclick="addToPO('${p.id}')" class="bg-white p-3 rounded-xl shadow-sm border hover:border-blue-500 cursor-pointer"><h3 class="font-semibold text-sm line-clamp-2">${p.name}</h3><p class="text-xs text-blue-500 mt-1">Sisa Stok: ${p.stock}</p></div>`; });
