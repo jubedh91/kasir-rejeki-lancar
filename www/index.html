@@ -10,6 +10,14 @@
         .no-scrollbar::-webkit-scrollbar { display: none; } 
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         * { -webkit-tap-highlight-color: transparent; }
+        @keyframes scanLaser {
+            0% { top: 15%; opacity: 0.8; }
+            50% { top: 85%; opacity: 1; }
+            100% { top: 15%; opacity: 0.8; }
+        }
+        .laser-line {
+            animation: scanLaser 2s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-800" onload="initAppSettings()">
@@ -86,7 +94,7 @@
                         <input type="text" id="search-box" oninput="filterProducts(this.value)" onkeydown="handleBarcodeScan(event)" placeholder="Cari nama atau Scan Barcode (SKU)..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
                     </div>
                     <button onclick="openManualItemModal()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-2 rounded-lg text-sm transition" title="Transaksi Tambahan"><i class="fa-solid fa-plus"></i></button>
-                    <button onclick="document.getElementById('search-box').focus()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-2 rounded-lg text-sm transition" title="Scan Barcode"><i class="fa-solid fa-barcode"></i></button>
+                    <button onclick="openScannerView('pos')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-2 rounded-lg text-sm transition" title="Scan Barcode Kamera"><i class="fa-solid fa-barcode"></i></button>
                     <button onclick="openDraftModal()" class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-2 rounded-lg text-sm relative transition" title="Draf Pesanan">
                         <i class="fa-solid fa-bell"></i>
                         <span id="draft-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
@@ -127,11 +135,13 @@
 
             <!-- === 2. VIEW MANAJEMEN BARANG ATAU JASA === -->
             <div id="view-products" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
+                <!-- Header Barang -->
                 <div class="px-4 py-3 bg-white border-b flex items-center justify-between shadow-sm z-10">
                     <div class="flex items-center space-x-3">
                         <button onclick="switchView('pos')" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-chevron-left"></i></button>
                         <h2 class="text-lg font-bold text-emerald-800">Barang</h2>
                     </div>
+                    <!-- Menu Titik Tiga Kanan Atas -->
                     <div class="relative">
                         <button onclick="toggleProductMenu()" class="text-emerald-700 text-xl p-1 focus:outline-none"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                         <div id="product-dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 hidden z-50">
@@ -143,20 +153,27 @@
                     </div>
                 </div>
 
+                <!-- Bilah Kontrol Pencarian, Filter Corong & Sortir (SS 1000918551) -->
                 <div class="p-3 bg-white border-b flex items-center space-x-2">
-                    <button onclick="openFilterStockModal()" class="text-emerald-600 text-xl px-2 py-1"><i class="fa-solid fa-filter"></i></button>
-                    <button onclick="openSortStockModal()" class="text-emerald-600 text-xl px-2 py-1"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
+                    <!-- Ikon Corong (Popup Notifikasi Stok) -->
+                    <button onclick="openFilterStockModal()" class="text-emerald-600 text-xl px-2 py-1 hover:text-emerald-700 transition"><i class="fa-solid fa-filter"></i></button>
+                    <!-- Ikon Panah Naik & Garis (Popup Filter Sortir) -->
+                    <button onclick="openSortStockModal()" class="text-emerald-600 text-xl px-2 py-1 hover:text-emerald-700 transition"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
                     <div class="relative flex-1">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fa-solid fa-search text-sm"></i></span>
                         <input type="text" id="inventory-search-box" oninput="filterInventory(this.value)" placeholder="Cari nama atau kode barang" class="w-full pl-9 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-gray-50 border-gray-200">
                     </div>
-                    <button onclick="document.getElementById('inventory-search-box').focus()" class="text-emerald-700 text-xl px-2"><i class="fa-solid fa-barcode"></i></button>
+                    <!-- Ikon Barcode: Langsung Mengarahkan ke Kamera Scan Android -->
+                    <button onclick="openScannerView('inventory')" class="text-emerald-700 text-xl px-2 hover:text-emerald-800 transition" title="Scan Kamera Barcode"><i class="fa-solid fa-barcode"></i></button>
                 </div>
 
+                <!-- Pill Bar Kategori Horizontal -->
                 <div id="inventory-category-bar" class="flex space-x-2 px-3 py-2 bg-white border-b overflow-x-auto no-scrollbar text-xs whitespace-nowrap shadow-xs"></div>
 
+                <!-- Daftar Kartu Barang -->
                 <div class="flex-1 overflow-y-auto divide-y divide-gray-100" id="inventory-card-list"></div>
 
+                <!-- Tombol Tambah Barang Bawah -->
                 <div class="p-4 bg-white border-t">
                     <button onclick="openAddProductModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-full shadow-lg transition active:scale-95 text-sm flex items-center justify-center">
                         Tambah Barang
@@ -164,14 +181,163 @@
                 </div>
             </div>
 
-            <!-- === 2A. HALAMAN PENGATURAN BARANG (PERSIS SS 1000918555) === -->
+            <!-- === 2A. SUB-LAYAR SCAN BARCODE / QR CODE KAMERA (PERSIS SS 1000918605) === -->
+            <div id="view-scanner" class="fixed inset-0 bg-black z-50 hidden flex flex-col">
+                <!-- Header Scanner -->
+                <div class="px-4 py-3 bg-black/80 text-white flex items-center justify-between z-20">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="closeScannerView()" class="text-xl font-bold hover:text-emerald-400"><i class="fa-solid fa-arrow-left"></i></button>
+                        <h2 class="text-base font-bold tracking-wide">Scan Barcode / QR Code</h2>
+                    </div>
+                    <button class="text-lg px-2"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                </div>
+
+                <!-- Balon Petunjuk Hijau (Speech Bubble) -->
+                <div class="px-4 pt-3 pb-2 z-20 flex justify-center">
+                    <div class="relative bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs px-4 py-2.5 rounded-2xl shadow-md max-w-sm text-left">
+                        Apabila terdapat kesulitan silahkan Scan di atas garis merah atau mencoba Scan Mode A
+                        <div class="absolute -bottom-2 left-6 w-3 h-3 bg-emerald-100 border-b border-r border-emerald-300 transform rotate-45"></div>
+                    </div>
+                </div>
+
+                <!-- Viewfinder Kamera & Laser Scanner -->
+                <div class="flex-1 relative flex items-center justify-center overflow-hidden">
+                    <video id="camera-stream-video" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover"></video>
+                    
+                    <!-- Kotak Target Putih (Corner Brackets) -->
+                    <div class="relative w-64 h-64 z-10 pointer-events-none">
+                        <!-- Sudut Kiri Atas -->
+                        <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+                        <!-- Sudut Kanan Atas -->
+                        <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+                        <!-- Sudut Kiri Bawah -->
+                        <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+                        <!-- Sudut Kanan Bawah -->
+                        <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+                        
+                        <!-- Garis Merah Laser Animasi -->
+                        <div class="absolute left-2 right-2 h-0.5 bg-red-500 shadow-md shadow-red-500/80 laser-line"></div>
+                    </div>
+                </div>
+
+                <!-- Kontrol Manual Input di Bawah -->
+                <div class="p-4 bg-black/90 text-center z-20 space-y-2">
+                    <p class="text-[11px] text-gray-400">Arahkan kamera ke kode barcode produk</p>
+                    <div class="flex space-x-2 max-w-sm mx-auto">
+                        <input type="text" id="scanner-manual-code" placeholder="Ketik barcode jika kamera buram..." class="flex-1 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg border border-gray-700 focus:outline-none">
+                        <button onclick="submitManualBarcode()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg">Cari</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === 2B. POPUP NOTIFIKASI STOK (PERSIS SS 1000918603) === -->
+            <div id="filter-stock-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
+                    <h3 class="font-extrabold text-gray-800 text-base mb-6 tracking-wide">NOTIFIKASI</h3>
+                    
+                    <div class="space-y-3.5 text-sm font-semibold">
+                        <!-- Stok Habis (Titik Merah) -->
+                        <button onclick="applyStockFilter('empty')" class="w-full flex items-center justify-between p-3.5 rounded-full border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="w-3.5 h-3.5 rounded-full bg-red-500 flex-shrink-0"></span>
+                                <span class="text-gray-800">Stok Habis : <span id="notif-count-empty">0</span> Barang</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                        </button>
+
+                        <!-- Stok Menipis (Titik Kuning) -->
+                        <button onclick="applyStockFilter('low')" class="w-full flex items-center justify-between p-3.5 rounded-full border border-gray-200 hover:border-yellow-400 hover:bg-yellow-50/50 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="w-3.5 h-3.5 rounded-full bg-yellow-400 flex-shrink-0"></span>
+                                <span class="text-gray-800">Stok Menipis : <span id="notif-count-low">0</span> Barang</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                        </button>
+
+                        <!-- Semua Stok (Titik Abu-abu / Hijau Aktif) -->
+                        <button onclick="applyStockFilter('all')" id="notif-btn-all" class="w-full flex items-center justify-between p-3.5 rounded-full border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 transition">
+                            <div class="flex items-center space-x-3">
+                                <span class="w-3.5 h-3.5 rounded-full bg-gray-300 flex-shrink-0"></span>
+                                <span class="text-gray-800">Semua Stok : <span id="notif-count-all">0</span> Barang</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Tombol TUTUP -->
+                    <button onclick="closeFilterStockModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3.5 rounded-full font-bold text-sm mt-6 transition">
+                        TUTUP
+                    </button>
+                </div>
+            </div>
+
+            <!-- === 2C. POPUP FILTER & SORTIR (PERSIS SS 1000918604) === -->
+            <div id="sort-stock-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6">
+                    <h3 class="font-extrabold text-gray-800 text-base mb-4 tracking-wide text-center">FILTER</h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Pilihan Urutan -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1.5">Urutan</label>
+                            <div class="relative">
+                                <select id="filter-sort-direction" class="w-full border border-gray-300 rounded-2xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white appearance-none">
+                                    <option value="desc">Urutan Turun</option>
+                                    <option value="asc">Urutan Naik</option>
+                                </select>
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Sortir Berdasarkan -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-2">Sortir Berdasarkan</label>
+                            <div class="space-y-3.5 text-sm text-gray-800 font-medium">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sort_criteria" value="name" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                    <span>Nama Barang</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sort_criteria" value="sku" checked class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                    <span>Kode</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sort_criteria" value="price" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                    <span>Harga jual</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sort_criteria" value="stock" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                    <span>Stok</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="radio" name="sort_criteria" value="latest" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                    <span>Produk Terbaru</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tombol BATAL dan TERAPKAN -->
+                    <div class="grid grid-cols-2 gap-3 mt-6">
+                        <button onclick="closeSortStockModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-3.5 rounded-full font-bold text-sm transition">
+                            BATAL
+                        </button>
+                        <button onclick="applyAdvancedFilterSort()" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-full font-bold text-sm transition">
+                            TERAPKAN
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === 2D. HALAMAN PENGATURAN BARANG === -->
             <div id="view-products-settings" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="closeProductSubView()" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-chevron-left"></i></button>
                     <h2 class="text-lg font-bold text-emerald-800">Pengaturan</h2>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4 space-y-6">
-                    <!-- Notifikasi batas stok -->
                     <div onclick="openProductSubView('stock-limit')" class="border-b pb-4 cursor-pointer flex justify-between items-center hover:bg-gray-50 p-2 rounded-xl transition">
                         <div>
                             <h4 class="font-bold text-sm text-gray-800">Notifikasi batas stok</h4>
@@ -180,7 +346,6 @@
                         <i class="fa-solid fa-chevron-right text-gray-400"></i>
                     </div>
 
-                    <!-- Kebutuhan Penyimpanan Data Barang -->
                     <div onclick="openProductSubView('db-necessity')" class="border-b pb-4 cursor-pointer flex justify-between items-center hover:bg-gray-50 p-2 rounded-xl transition">
                         <div>
                             <h4 class="font-bold text-sm text-gray-800">Kebutuhan Penyimpanan Data Barang</h4>
@@ -189,7 +354,6 @@
                         <i class="fa-solid fa-chevron-right text-gray-400"></i>
                     </div>
 
-                    <!-- Tampilkan Data -->
                     <div class="space-y-4 pt-2">
                         <div>
                             <h4 class="font-bold text-sm text-gray-800">Tampilkan Data</h4>
@@ -222,7 +386,7 @@
                 </div>
             </div>
 
-            <!-- === 2B. SUB-LAYAR STOCK LIMIT NOTIFICATION (PERSIS SS 1000918556) === -->
+            <!-- SUB-LAYAR STOCK LIMIT NOTIFICATION -->
             <div id="view-stock-limit" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="openProductSubView('settings')" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-arrow-left"></i></button>
@@ -242,7 +406,7 @@
                 </div>
             </div>
 
-            <!-- === 2C. SUB-LAYAR DATABASE NECESSITY (PERSIS SS 1000918557) === -->
+            <!-- SUB-LAYAR DATABASE NECESSITY -->
             <div id="view-db-necessity" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="openProductSubView('settings')" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-arrow-left"></i></button>
@@ -251,26 +415,11 @@
                 <div class="flex-1 overflow-y-auto p-4 space-y-5">
                     <p class="text-xs text-gray-500">Sesuaikan dengan kebutuhan penyimpanan database usaha anda</p>
                     <div class="space-y-4 text-sm font-medium text-gray-700">
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="chk-nec-harga-dasar" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
-                            <span>Harga dasar</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="chk-nec-satuan" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
-                            <span>Satuan (gram,pcs)</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="chk-nec-diskon" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
-                            <span>Diskon (%)</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="chk-nec-letak-rak" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
-                            <span>Letak rak</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="chk-nec-keterangan" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
-                            <span>Keterangan</span>
-                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="chk-nec-harga-dasar" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300"><span>Harga dasar</span></label>
+                        <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="chk-nec-satuan" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300"><span>Satuan (gram,pcs)</span></label>
+                        <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="chk-nec-diskon" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300"><span>Diskon (%)</span></label>
+                        <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="chk-nec-letak-rak" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300"><span>Letak rak</span></label>
+                        <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="chk-nec-keterangan" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300"><span>Keterangan</span></label>
                     </div>
                     <div class="pt-4 border-t">
                         <p class="text-[11px] text-gray-400 italic leading-relaxed">*Apabila stok dicentang maka saat transaksi jumlah barang akan berkurang sesuai jumlah transaksi barang</p>
@@ -283,7 +432,7 @@
                 </div>
             </div>
 
-            <!-- === 2D. LAYAR RINCIAN / DATABASE (PERSIS SS 1000918558) === -->
+            <!-- LAYAR RINCIAN / DATABASE -->
             <div id="view-db-summary" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="closeProductSubView()" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-arrow-left"></i></button>
@@ -298,7 +447,6 @@
                         <h4 class="text-xs font-semibold text-gray-600 mb-1">Total Kuantitas Fisik</h4>
                         <p class="text-lg font-bold text-gray-800" id="db-summary-qty-count">0 Pcs</p>
                     </div>
-                    <!-- Estimasi Total Modal: Hanya Tampil untuk Akun Owner/Admin -->
                     <div id="db-summary-asset-container" class="border-b pb-3">
                         <h4 class="text-xs font-semibold text-gray-600 mb-1">Estimasi Total Modal</h4>
                         <p class="text-lg font-bold text-orange-600" id="db-summary-asset-count">Rp 0</p>
@@ -307,33 +455,7 @@
                 </div>
             </div>
 
-            <!-- === MODAL POPUP & VIEW LAINNYA === -->
-            <div id="filter-stock-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-                <div class="bg-white rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5">
-                    <h3 class="font-bold text-gray-800 mb-3 text-sm">Filter Ketersediaan Stok</h3>
-                    <div class="space-y-2 text-sm">
-                        <button onclick="applyStockFilter('all')" class="w-full text-left p-2.5 rounded-lg hover:bg-emerald-50 text-gray-700 font-medium flex justify-between"><span>Semua Barang</span><i class="fa-solid fa-boxes-stacked text-emerald-600"></i></button>
-                        <button onclick="applyStockFilter('low')" class="w-full text-left p-2.5 rounded-lg hover:bg-yellow-50 text-yellow-700 font-medium flex justify-between"><span>Stok Menipis</span><i class="fa-solid fa-triangle-exclamation text-yellow-500"></i></button>
-                        <button onclick="applyStockFilter('empty')" class="w-full text-left p-2.5 rounded-lg hover:bg-red-50 text-red-700 font-medium flex justify-between"><span>Stok Habis (0)</span><i class="fa-solid fa-circle-xmark text-red-500"></i></button>
-                    </div>
-                    <button onclick="closeFilterStockModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-bold mt-4">BATAL</button>
-                </div>
-            </div>
-
-            <div id="sort-stock-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-                <div class="bg-white rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5">
-                    <h3 class="font-bold text-gray-800 mb-3 text-sm">Urutkan Barang</h3>
-                    <div class="space-y-2 text-sm">
-                        <button onclick="applyStockSort('name_asc')" class="w-full text-left p-2.5 rounded-lg hover:bg-emerald-50 text-gray-700">Nama (A - Z)</button>
-                        <button onclick="applyStockSort('name_desc')" class="w-full text-left p-2.5 rounded-lg hover:bg-emerald-50 text-gray-700">Nama (Z - A)</button>
-                        <button onclick="applyStockSort('stock_desc')" class="w-full text-left p-2.5 rounded-lg hover:bg-emerald-50 text-gray-700">Stok Terbanyak</button>
-                        <button onclick="applyStockSort('stock_asc')" class="w-full text-left p-2.5 rounded-lg hover:bg-emerald-50 text-gray-700">Stok Paling Sedikit</button>
-                        <button onclick="applyStockSort('price_desc')" class="w-full text-left p-2.5 rounded-lg hover:bg-emerald-50 text-gray-700">Harga Jual Tertinggi</button>
-                    </div>
-                    <button onclick="closeSortStockModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-xs font-bold mt-4">BATAL</button>
-                </div>
-            </div>
-
+            <!-- Modal Tambah & Edit Barang -->
             <div id="edit-product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
                     <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center">
@@ -356,7 +478,6 @@
                 </div>
             </div>
 
-            <!-- Modal Tambah Barang -->
             <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
                     <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center">
@@ -378,7 +499,7 @@
                 </div>
             </div>
 
-            <!-- Modal Checkout Kasir -->
+            <!-- Modals Kasir & Transaksi -->
             <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
                     <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Pembayaran Kasir</span><button onclick="closeCheckoutModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div>
@@ -393,7 +514,6 @@
                 </div>
             </div>
 
-            <!-- Modal Lainnya -->
             <div id="manual-item-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"><div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center"><span>Transaksi Tambahan</span><button onclick="closeManualItemModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-4 space-y-3"><div class="bg-yellow-50 p-2 rounded text-xs text-yellow-700 mb-2">Tambahkan barang manual (Tidak potong stok).</div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Barang / Jasa</label><input type="text" id="manual-name" class="w-full border p-2 rounded-lg text-sm"></div><div class="flex space-x-2"><div class="flex-1"><label class="block text-xs font-semibold text-gray-600 mb-1">Harga Dasar (Rp)</label><input type="number" id="manual-hpp" class="w-full border p-2 rounded-lg text-sm" pattern="[0-9]*" inputmode="numeric"></div><div class="flex-1"><label class="block text-xs font-semibold text-gray-600 mb-1">Harga Jual (Rp)</label><input type="number" id="manual-price" class="w-full border p-2 rounded-lg text-sm" pattern="[0-9]*" inputmode="numeric"></div></div><div><label class="block text-xs font-semibold text-gray-600 mb-1">Kuantitas</label><input type="number" id="manual-qty" class="w-full border p-2 rounded-lg text-sm" value="1" pattern="[0-9]*" inputmode="numeric"></div><button onclick="addManualItemToCart()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">TAMBAH KE KERANJANG</button></div></div></div>
             <div id="draft-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4"><div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[80vh]"><div class="bg-orange-500 text-white p-4 font-bold flex justify-between items-center"><span>Daftar Draf Pesanan</span><button onclick="closeDraftModal()"><i class="fa-solid fa-xmark text-lg"></i></button></div><div class="p-4 overflow-y-auto flex-1 bg-gray-50"><div id="draft-list-container" class="space-y-3"></div></div></div></div>
 
@@ -406,7 +526,7 @@
     <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAYlaNmY5xdAO72-GceG8TMODAXrvKoQSo",
@@ -420,9 +540,110 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let products = [], cart = [], contacts = [];
+        let products = [], cart = [];
         window.currentCartTotal = 0; window.currentCartHpp = 0; window.finalGrandTotal = 0;
         window.allTransactions = []; window.activeKasir = "Owner";
+        let cameraStream = null;
+        let scannerTargetMode = 'inventory';
+
+        // ==== 1. MODUL POPUP NOTIFIKASI STOK (SS 1000918603) ====
+        window.openFilterStockModal = () => {
+            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
+            const emptyCount = products.filter(p => (Number(p.stock) || 0) <= 0).length;
+            const lowCount = products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock).length;
+            
+            document.getElementById('notif-count-empty').innerText = emptyCount.toString();
+            document.getElementById('notif-count-low').innerText = lowCount.toString();
+            document.getElementById('notif-count-all').innerText = products.length.toString();
+            
+            document.getElementById('filter-stock-modal').classList.remove('hidden');
+        };
+        window.closeFilterStockModal = () => document.getElementById('filter-stock-modal').classList.add('hidden');
+        window.applyStockFilter = (type) => {
+            closeFilterStockModal();
+            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
+            if(type === 'all') renderInventoryCards(products);
+            else if(type === 'low') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock));
+            else if(type === 'empty') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) <= 0));
+        };
+
+        // ==== 2. MODUL POPUP FILTER SORTIR (SS 1000918604) ====
+        window.openSortStockModal = () => document.getElementById('sort-stock-modal').classList.remove('hidden');
+        window.closeSortStockModal = () => document.getElementById('sort-stock-modal').classList.add('hidden');
+        window.applyAdvancedFilterSort = () => {
+            closeSortStockModal();
+            const direction = document.getElementById('filter-sort-direction').value; // 'desc' atau 'asc'
+            const criteria = document.querySelector('input[name="sort_criteria"]:checked').value;
+
+            let sorted = [...products];
+
+            sorted.sort((a, b) => {
+                let res = 0;
+                if (criteria === 'name') {
+                    res = (a.name || '').localeCompare(b.name || '');
+                } else if (criteria === 'sku') {
+                    res = (a.sku || '').localeCompare(b.sku || '');
+                } else if (criteria === 'price') {
+                    res = (Number(a.price) || 0) - (Number(b.price) || 0);
+                } else if (criteria === 'stock') {
+                    res = (Number(a.stock) || 0) - (Number(b.stock) || 0);
+                } else if (criteria === 'latest') {
+                    const timeA = a.createdAt ? a.createdAt.seconds || 0 : 0;
+                    const timeB = b.createdAt ? b.createdAt.seconds || 0 : 0;
+                    res = timeA - timeB;
+                }
+                return direction === 'desc' ? -res : res;
+            });
+
+            renderInventoryCards(sorted);
+        };
+
+        // ==== 3. MODUL SCANNER KAMERA ANDROID (SS 1000918605) ====
+        window.openScannerView = async (target) => {
+            scannerTargetMode = target || 'inventory';
+            document.getElementById('view-scanner').classList.remove('hidden');
+            const video = document.getElementById('camera-stream-video');
+
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: "environment" } }
+                });
+                video.srcObject = cameraStream;
+            } catch (err) {
+                console.warn("Kamera tidak dapat diakses langsung:", err);
+            }
+        };
+
+        window.closeScannerView = () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            document.getElementById('view-scanner').classList.add('hidden');
+        };
+
+        window.submitManualBarcode = () => {
+            const code = document.getElementById('scanner-manual-code').value.trim();
+            if (!code) return;
+            handleScannedResult(code);
+            document.getElementById('scanner-manual-code').value = '';
+        };
+
+        function handleScannedResult(code) {
+            closeScannerView();
+            if (scannerTargetMode === 'inventory') {
+                document.getElementById('inventory-search-box').value = code;
+                filterInventory(code);
+            } else if (scannerTargetMode === 'pos') {
+                const found = products.find(p => (p.sku && p.sku.toLowerCase() === code.toLowerCase()) || (p.name.toLowerCase() === code.toLowerCase()));
+                if (found) {
+                    addToCart(found.id);
+                } else {
+                    document.getElementById('search-box').value = code;
+                    filterProducts(code);
+                }
+            }
+        }
 
         // ==== MODUL SUB-LAYAR PENGATURAN & RINCIAN BARANG ====
         window.openProductSubView = (type) => {
@@ -485,7 +706,6 @@
             document.getElementById('db-summary-item-count').innerText = `${products.length.toLocaleString('id-ID')} Item`;
             document.getElementById('db-summary-qty-count').innerText = `${totalQty.toLocaleString('id-ID')} Pcs`;
 
-            // Hak Akses: Estimasi Total Modal Hanya untuk Owner/Admin
             const isOwner = window.activeKasir.toLowerCase().includes('owner') || window.activeKasir.toLowerCase().includes('admin');
             const assetContainer = document.getElementById('db-summary-asset-container');
             if (isOwner) {
@@ -498,28 +718,6 @@
 
         // ==== MODUL DAFTAR BARANG ====
         window.toggleProductMenu = () => document.getElementById('product-dropdown-menu').classList.toggle('hidden');
-        window.openFilterStockModal = () => document.getElementById('filter-stock-modal').classList.remove('hidden');
-        window.closeFilterStockModal = () => document.getElementById('filter-stock-modal').classList.add('hidden');
-        window.applyStockFilter = (type) => {
-            closeFilterStockModal();
-            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
-            if(type === 'all') renderInventoryCards(products);
-            else if(type === 'low') renderInventoryCards(products.filter(p => p.stock > 0 && p.stock <= minStock));
-            else if(type === 'empty') renderInventoryCards(products.filter(p => p.stock <= 0));
-        };
-
-        window.openSortStockModal = () => document.getElementById('sort-stock-modal').classList.remove('hidden');
-        window.closeSortStockModal = () => document.getElementById('sort-stock-modal').classList.add('hidden');
-        window.applyStockSort = (sortType) => {
-            closeSortStockModal();
-            let sorted = [...products];
-            if(sortType === 'name_asc') sorted.sort((a,b) => a.name.localeCompare(b.name));
-            else if(sortType === 'name_desc') sorted.sort((a,b) => b.name.localeCompare(a.name));
-            else if(sortType === 'stock_desc') sorted.sort((a,b) => b.stock - a.stock);
-            else if(sortType === 'stock_asc') sorted.sort((a,b) => a.stock - b.stock);
-            else if(sortType === 'price_desc') sorted.sort((a,b) => b.price - a.price);
-            renderInventoryCards(sorted);
-        };
 
         function renderInventoryCards(list) {
             const container = document.getElementById('inventory-card-list');
@@ -672,6 +870,7 @@
                 loadInitialData();
             } catch(e) { alert("Gagal update data."); }
         };
+
         window.exportProductsCSV = function() {
             if(products.length === 0) return alert('Kosong');
             let csvContent = "Kode SKU,Kategori,Nama Barang,Harga Modal,Harga Jual,Stok Saat Ini\n";
