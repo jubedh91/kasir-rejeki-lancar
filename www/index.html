@@ -38,7 +38,7 @@
     <!-- App Container -->
     <div id="app" class="flex flex-col h-screen overflow-hidden">
         
-        <!-- HEADER UTAMA (HANYA AKTIF DI POS/HOME) -->
+        <!-- HEADER UTAMA -->
         <header id="main-header" class="bg-emerald-700 text-white shadow-md z-10 flex items-center justify-between px-4 py-3">
             <div class="flex items-center space-x-3">
                 <button onclick="toggleSidebar()" class="text-white text-xl focus:outline-none hover:text-emerald-200 transition"><i class="fa-solid fa-bars"></i></button>
@@ -135,13 +135,11 @@
 
             <!-- === 2. VIEW MANAJEMEN BARANG ATAU JASA === -->
             <div id="view-products" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
-                <!-- Header Barang -->
                 <div class="px-4 py-3 bg-white border-b flex items-center justify-between shadow-sm z-10">
                     <div class="flex items-center space-x-3">
                         <button onclick="switchView('pos')" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-chevron-left"></i></button>
                         <h2 class="text-lg font-bold text-emerald-800">Barang</h2>
                     </div>
-                    <!-- Menu Titik Tiga Kanan Atas -->
                     <div class="relative">
                         <button onclick="toggleProductMenu()" class="text-emerald-700 text-xl p-1 focus:outline-none"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                         <div id="product-dropdown-menu" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 hidden z-50">
@@ -153,7 +151,6 @@
                     </div>
                 </div>
 
-                <!-- Bilah Kontrol Pencarian, Filter Corong & Sortir -->
                 <div class="p-3 bg-white border-b flex items-center space-x-2">
                     <button onclick="openFilterStockModal()" class="text-emerald-600 text-xl px-2 py-1 hover:text-emerald-700 transition"><i class="fa-solid fa-filter"></i></button>
                     <button onclick="openSortStockModal()" class="text-emerald-600 text-xl px-2 py-1 hover:text-emerald-700 transition"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
@@ -164,21 +161,212 @@
                     <button onclick="openScannerView('inventory')" class="text-emerald-700 text-xl px-2 hover:text-emerald-800 transition" title="Scan Kamera Barcode"><i class="fa-solid fa-barcode"></i></button>
                 </div>
 
-                <!-- Pill Bar Kategori Horizontal -->
                 <div id="inventory-category-bar" class="flex space-x-2 px-3 py-2 bg-white border-b overflow-x-auto no-scrollbar text-xs whitespace-nowrap shadow-xs"></div>
 
-                <!-- Daftar Kartu Barang -->
                 <div class="flex-1 overflow-y-auto divide-y divide-gray-100" id="inventory-card-list"></div>
 
-                <!-- Tombol Tambah Barang Bawah -->
                 <div class="p-4 bg-white border-t">
-                    <button onclick="openAddProductModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-full shadow-lg transition active:scale-95 text-sm flex items-center justify-center">
+                    <button onclick="openAddProductView()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-full shadow-lg transition active:scale-95 text-sm flex items-center justify-center">
                         Tambah Barang
                     </button>
                 </div>
             </div>
 
-            <!-- === 2A. SUB-LAYAR SCAN BARCODE / QR CODE KAMERA === -->
+            <!-- === 2A. FORM LENGKAP TAMBAH BARANG (PERSIS SS 1000919568 & 1000919569) === -->
+            <div id="view-add-product" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
+                <!-- Header Tambah Barang: Tanpa Tombol 'Tambah Instan' -->
+                <div class="px-4 py-3 bg-white border-b flex items-center justify-between shadow-sm z-10">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="closeAddProductView()" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h2 class="text-lg font-bold text-emerald-800">Tambah Barang</h2>
+                    </div>
+                </div>
+
+                <!-- Formulir Tambah Barang (Bisa Digulir ke Bawah) -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-28">
+                    <!-- Wadah Foto Produk & Tombol Kamera / Galeri -->
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="w-24 h-24 bg-gray-100 border border-dashed border-gray-300 rounded-2xl flex items-center justify-center overflow-hidden relative shadow-inner mb-2" id="preview-box-container">
+                            <img id="add-prod-img-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                            <div id="add-prod-img-placeholder" class="text-gray-300 text-4xl"><i class="fa-regular fa-image"></i></div>
+                        </div>
+                        <div class="flex items-center space-x-5 text-emerald-600 text-2xl">
+                            <!-- Tombol Kamera (Auto Kompres < 80 KB) -->
+                            <button onclick="document.getElementById('input-prod-camera').click()" type="button" class="p-1 hover:text-emerald-700 transition" title="Ambil Foto Kamera">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                            <!-- Tombol Galeri (Batas Maksimal 100 KB) -->
+                            <button onclick="document.getElementById('input-prod-gallery').click()" type="button" class="p-1 hover:text-emerald-700 transition" title="Pilih dari Galeri">
+                                <i class="fa-regular fa-image"></i>
+                            </button>
+                        </div>
+                        <input type="file" id="input-prod-camera" accept="image/*" capture="environment" class="hidden" onchange="handleCameraCapture(event)">
+                        <input type="file" id="input-prod-gallery" accept="image/*" class="hidden" onchange="handleGalleryPick(event)">
+                        <input type="hidden" id="add-prod-image-base64" value="">
+                    </div>
+
+                    <!-- Nama* -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Nama*</label>
+                        <input type="text" id="add-name" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+
+                    <!-- Tipe Barang (Dropdown) -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Tipe Barang</label>
+                        <div class="relative">
+                            <select id="add-type" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none bg-white">
+                                <option value="Default">Default</option>
+                                <option value="Bahan Baku">Bahan Baku</option>
+                                <option value="Paket">Paket</option>
+                                <option value="Varian">Varian</option>
+                                <option value="Multisatuan">Multisatuan</option>
+                                <option value="IMEI">IMEI</option>
+                                <option value="Add On">Add On</option>
+                            </select>
+                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Checkboxes: Tampilkan di Transaksi & Pakai Stok -->
+                    <div class="space-y-3 pt-1">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="add-chk-transaksi" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
+                            <span class="text-sm font-semibold text-gray-700">Tampilkan di Transaksi</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="add-chk-pakai-stok" checked class="w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500">
+                            <span class="text-sm font-semibold text-gray-700">Pakai stok</span>
+                        </label>
+                    </div>
+
+                    <!-- Stok* -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Stok*</label>
+                        <input type="number" id="add-stock" value="0" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" pattern="[0-9]*" inputmode="numeric">
+                    </div>
+
+                    <!-- Kode* dengan Ikon Refresh & Barcode Scan -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Kode*</label>
+                        <div class="relative flex items-center">
+                            <input type="text" id="add-sku" class="w-full border border-gray-300 p-3 pr-20 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <div class="absolute right-2 flex items-center space-x-2 text-emerald-600 text-lg">
+                                <button onclick="generateRandomSKU()" type="button" class="p-1 hover:text-emerald-700 transition" title="Buat Kode Acak"><i class="fa-solid fa-arrows-rotate"></i></button>
+                                <button onclick="openScannerView('add-product')" type="button" class="p-1 hover:text-emerald-700 transition" title="Scan Barcode"><i class="fa-solid fa-barcode"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Harga dasar* -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Harga dasar*</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-sm font-semibold text-gray-500">Rp</span>
+                            <input type="number" id="add-buyprice" value="0" oninput="calculateMarginMarkup()" class="w-full border border-gray-300 pl-11 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" pattern="[0-9]*" inputmode="numeric">
+                        </div>
+                    </div>
+
+                    <!-- Harga jual* -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Harga jual*</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-sm font-semibold text-gray-500">Rp</span>
+                            <input type="number" id="add-price" value="0" oninput="calculateMarginMarkup()" class="w-full border border-gray-300 pl-11 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" pattern="[0-9]*" inputmode="numeric">
+                        </div>
+                        <!-- Kalkulator Dinamis Markup & Margin (Persis SS 1000919569) -->
+                        <div class="mt-2 space-y-1 text-xs text-gray-500 italic">
+                            <p class="flex items-center space-x-1">
+                                <span>Markup Penjualan <span id="disp-markup-val" class="font-bold text-gray-700">0%</span></span>
+                                <i class="fa-regular fa-circle-question text-emerald-600"></i>
+                            </p>
+                            <p class="flex items-center space-x-1">
+                                <span>Margin Keuntungan <span id="disp-margin-val" class="font-bold text-gray-700">0%</span></span>
+                                <i class="fa-regular fa-circle-question text-emerald-600"></i>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Kategori + Tombol '+' Cepat -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Kategori</label>
+                        <div class="flex items-center space-x-2">
+                            <div class="relative flex-1">
+                                <select id="add-category" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none bg-white">
+                                    <option value="Umum">Umum</option>
+                                </select>
+                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </span>
+                            </div>
+                            <button onclick="promptQuickCategory()" type="button" class="w-11 h-11 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-full flex items-center justify-center text-lg font-bold shadow-xs transition flex-shrink-0">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Batas Minimum Stok -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Batas Minimum Stok</label>
+                        <input type="number" id="add-min-stock" value="0" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" pattern="[0-9]*" inputmode="numeric">
+                    </div>
+
+                    <!-- Berat (gram) & Satuan (gram,pcs) -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Berat (gram)</label>
+                            <input type="number" id="add-weight" placeholder="" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" pattern="[0-9]*" inputmode="numeric">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Satuan (gram,pcs)</label>
+                            <input type="text" id="add-unit" placeholder="pcs" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+
+                    <!-- Diskon dengan Toggle % / Rp -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Diskon</label>
+                        <div class="flex items-center border border-gray-300 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500">
+                            <input type="number" id="add-discount-val" value="0" class="flex-1 p-3 text-sm focus:outline-none" pattern="[0-9]*" inputmode="numeric">
+                            <div class="flex bg-gray-100 border-l">
+                                <button type="button" id="btn-disc-pct" onclick="setDiscountType('pct')" class="px-3.5 py-3 text-xs font-bold bg-emerald-600 text-white transition">%</button>
+                                <button type="button" id="btn-disc-rp" onclick="setDiscountType('rp')" class="px-3.5 py-3 text-xs font-bold text-gray-600 transition">Rp</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Letak rak -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Letak rak</label>
+                        <input type="text" id="add-rack" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+
+                    <!-- Keterangan -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Keterangan</label>
+                        <input type="text" id="add-notes" class="w-full border border-gray-300 p-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+
+                    <!-- Tombol Tambah Tipe Harga -->
+                    <div>
+                        <button onclick="alert('Form Tipe Harga Grosir/Eceran akan disesuaikan pada giliran SS selanjutnya.')" type="button" class="w-full border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-50 py-3 rounded-2xl font-bold text-xs transition">
+                            Tambah Tipe Harga<br>
+                            <span class="text-[10px] font-normal text-emerald-600">(Grosir / Retailer / Eceran / Gojek)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tombol Simpan Sticky di Bawah -->
+                <div class="p-4 bg-white border-t absolute bottom-0 left-0 right-0 z-10">
+                    <button onclick="saveFullNewProduct()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-full shadow-lg transition active:scale-95 text-sm flex items-center justify-center">
+                        Simpan
+                    </button>
+                </div>
+            </div>
+
+            <!-- === SUB-LAYAR SCANNER KAMERA === -->
             <div id="view-scanner" class="fixed inset-0 bg-black z-50 hidden flex flex-col">
                 <div class="px-4 py-3 bg-black/80 text-white flex items-center justify-between z-20">
                     <div class="flex items-center space-x-4">
@@ -216,7 +404,7 @@
                 </div>
             </div>
 
-            <!-- === 2B. POPUP NOTIFIKASI STOK === -->
+            <!-- === POPUP NOTIFIKASI STOK === -->
             <div id="filter-stock-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
                     <h3 class="font-extrabold text-gray-800 text-base mb-6 tracking-wide">NOTIFIKASI</h3>
@@ -253,7 +441,7 @@
                 </div>
             </div>
 
-            <!-- === 2C. POPUP FILTER & SORTIR === -->
+            <!-- === POPUP FILTER & SORTIR === -->
             <div id="sort-stock-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6">
                     <h3 class="font-extrabold text-gray-800 text-base mb-4 tracking-wide text-center">FILTER</h3>
@@ -310,7 +498,7 @@
                 </div>
             </div>
 
-            <!-- === 2D. HALAMAN PENGATURAN BARANG === -->
+            <!-- === PENGATURAN, LIMIT, NECESSITY & DATABASE SUMMARY === -->
             <div id="view-products-settings" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="closeProductSubView()" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-chevron-left"></i></button>
@@ -365,7 +553,6 @@
                 </div>
             </div>
 
-            <!-- SUB-LAYAR STOCK LIMIT NOTIFICATION -->
             <div id="view-stock-limit" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="openProductSubView('settings')" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-arrow-left"></i></button>
@@ -385,7 +572,6 @@
                 </div>
             </div>
 
-            <!-- SUB-LAYAR DATABASE NECESSITY -->
             <div id="view-db-necessity" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="openProductSubView('settings')" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-arrow-left"></i></button>
@@ -411,7 +597,6 @@
                 </div>
             </div>
 
-            <!-- LAYAR RINCIAN / DATABASE -->
             <div id="view-db-summary" class="view-panel flex-1 flex flex-col h-full overflow-hidden bg-white hidden relative">
                 <div class="px-4 py-3 bg-white border-b flex items-center space-x-4 shadow-sm z-10">
                     <button onclick="closeProductSubView()" class="text-emerald-700 text-xl font-bold"><i class="fa-solid fa-arrow-left"></i></button>
@@ -434,7 +619,7 @@
                 </div>
             </div>
 
-            <!-- Modal Tambah & Edit Barang -->
+            <!-- Modal Edit Singkat Barang -->
             <div id="edit-product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
                     <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center">
@@ -453,27 +638,6 @@
                         </div>
                         <div><label class="block text-xs font-semibold text-gray-600 mb-1">Stok Fisik Saat Ini</label><input type="number" id="edit-input-stock" class="w-full border p-2 rounded-lg text-sm" pattern="[0-9]*" inputmode="numeric"></div>
                         <button onclick="updateProduct()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN PERUBAHAN</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-                <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-                    <div class="bg-emerald-700 text-white p-4 font-bold flex justify-between items-center">
-                        <span>Tambah Barang</span><button onclick="closeAddProductModal()"><i class="fa-solid fa-xmark text-lg"></i></button>
-                    </div>
-                    <div class="p-4 space-y-3">
-                        <div class="flex space-x-2">
-                            <div class="flex-1"><label class="block text-xs font-semibold text-gray-600 mb-1">Kode SKU</label><input type="text" id="input-sku" class="w-full border p-2 rounded-lg text-sm"></div>
-                            <div class="flex-1"><label class="block text-xs font-semibold text-gray-600 mb-1">Kategori</label><input type="text" id="input-category" class="w-full border p-2 rounded-lg text-sm"></div>
-                        </div>
-                        <div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Barang</label><input type="text" id="input-name" class="w-full border p-2 rounded-lg text-sm"></div>
-                        <div class="flex space-x-2">
-                            <div class="flex-1"><label class="block text-xs font-semibold text-gray-600 mb-1">HPP (Modal)</label><input type="number" id="input-buyprice" class="w-full border p-2 rounded-lg text-sm" pattern="[0-9]*" inputmode="numeric"></div>
-                            <div class="flex-1"><label class="block text-xs font-semibold text-gray-600 mb-1">Harga Jual</label><input type="number" id="input-price" class="w-full border p-2 rounded-lg text-sm" pattern="[0-9]*" inputmode="numeric"></div>
-                        </div>
-                        <div><label class="block text-xs font-semibold text-gray-600 mb-1">Stok Awal</label><input type="number" id="input-stock" class="w-full border p-2 rounded-lg text-sm" pattern="[0-9]*" inputmode="numeric"></div>
-                        <button onclick="saveNewProduct()" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold text-sm mt-4">SIMPAN BARANG</button>
                     </div>
                 </div>
             </div>
@@ -524,10 +688,10 @@
         window.allTransactions = []; window.activeKasir = "Owner";
         let cameraStream = null;
         let scannerTargetMode = 'inventory';
+        let discountMode = 'pct'; // 'pct' atau 'rp'
 
-        // ==== SISTEM NAVIGASI & KONTROL VIEW PANEL RESMI (MEMPERBAIKI BUG SPLIT SCREEN) ====
+        // ==== SISTEM NAVIGASI & KONTROL VIEW PANEL RESMI ====
         window.switchView = function(viewName) {
-            // Sembunyikan SELURUH panel tampilan
             document.querySelectorAll('.view-panel').forEach(panel => {
                 panel.classList.add('hidden');
             });
@@ -552,7 +716,6 @@
                 if (floatingCart) floatingCart.style.display = 'none';
             }
 
-            // Update Nav Aktif di Drawer
             const activeNav = document.getElementById(`nav-${viewName}`);
             if (activeNav) {
                 document.querySelectorAll('#sidebar nav a').forEach(a => {
@@ -566,9 +729,326 @@
             }
         };
 
-        // ==== MODUL SUB-LAYAR PENGATURAN & RINCIAN BARANG ====
+        // ==== MODUL FORM TAMBAH BARANG LENGKAP ====
+        window.openAddProductView = () => {
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById('view-add-product').classList.remove('hidden');
+
+            // Reset Input Form
+            document.getElementById('add-name').value = '';
+            document.getElementById('add-type').value = 'Default';
+            document.getElementById('add-chk-transaksi').checked = true;
+            document.getElementById('add-chk-pakai-stok').checked = true;
+            document.getElementById('add-stock').value = '0';
+            document.getElementById('add-sku').value = '';
+            document.getElementById('add-buyprice').value = '0';
+            document.getElementById('add-price').value = '0';
+            document.getElementById('add-min-stock').value = localStorage.getItem('toko_min_stock') || '20';
+            document.getElementById('add-weight').value = '';
+            document.getElementById('add-unit').value = 'pcs';
+            document.getElementById('add-discount-val').value = '0';
+            document.getElementById('add-rack').value = '';
+            document.getElementById('add-notes').value = '';
+            document.getElementById('add-prod-image-base64').value = '';
+            document.getElementById('add-prod-img-preview').classList.add('hidden');
+            document.getElementById('add-prod-img-placeholder').classList.remove('hidden');
+
+            calculateMarginMarkup();
+            populateCategoryDropdown();
+        };
+
+        window.closeAddProductView = () => {
+            document.getElementById('view-add-product').classList.add('hidden');
+            document.getElementById('view-products').classList.remove('hidden');
+        };
+
+        window.generateRandomSKU = () => {
+            const randomCode = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+            document.getElementById('add-sku').value = randomCode;
+        };
+
+        window.calculateMarginMarkup = () => {
+            const buy = Number(document.getElementById('add-buyprice').value) || 0;
+            const sell = Number(document.getElementById('add-price').value) || 0;
+
+            let markup = 0;
+            let margin = 0;
+
+            if (buy > 0) {
+                markup = ((sell - buy) / buy) * 100;
+            }
+            if (sell > 0) {
+                margin = ((sell - buy) / sell) * 100;
+            }
+
+            document.getElementById('disp-markup-val').innerText = `${markup.toFixed(1)}%`;
+            document.getElementById('disp-margin-val').innerText = `${margin.toFixed(1)}%`;
+        };
+
+        window.setDiscountType = (type) => {
+            discountMode = type;
+            const btnPct = document.getElementById('btn-disc-pct');
+            const btnRp = document.getElementById('btn-disc-rp');
+            if (type === 'pct') {
+                btnPct.className = "px-3.5 py-3 text-xs font-bold bg-emerald-600 text-white transition";
+                btnRp.className = "px-3.5 py-3 text-xs font-bold text-gray-600 transition";
+            } else {
+                btnRp.className = "px-3.5 py-3 text-xs font-bold bg-emerald-600 text-white transition";
+                btnPct.className = "px-3.5 py-3 text-xs font-bold text-gray-600 transition";
+            }
+        };
+
+        function populateCategoryDropdown() {
+            const select = document.getElementById('add-category');
+            select.innerHTML = '';
+            let categories = ["Umum"];
+            products.forEach(p => {
+                const c = p.category && p.category.trim() !== '' ? p.category : "Umum";
+                if(!categories.includes(c)) categories.push(c);
+            });
+            categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+        }
+
+        window.promptQuickCategory = () => {
+            const newCat = prompt("Masukkan nama kategori baru:");
+            if (newCat && newCat.trim() !== '') {
+                const select = document.getElementById('add-category');
+                const opt = document.createElement('option');
+                opt.value = newCat.trim();
+                opt.innerText = newCat.trim();
+                opt.selected = true;
+                select.appendChild(opt);
+            }
+        };
+
+        // ==== LOGIKA FOTO KAMERA (AUTO KOMPRES < 80 KB) ====
+        window.handleCameraCapture = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const maxSide = 800; // Skala maksimal
+
+                    if (w > maxSide || h > maxSide) {
+                        if (w > h) {
+                            h = Math.round((h * maxSide) / w);
+                            w = maxSide;
+                        } else {
+                            w = Math.round((w * maxSide) / h);
+                            h = maxSide;
+                        }
+                    }
+
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    // Kompresi otomatis bertahap sampai di bawah 80 KB
+                    let quality = 0.7;
+                    let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    while (dataUrl.length * 0.75 > 80 * 1024 && quality > 0.2) {
+                        quality -= 0.1;
+                        dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    }
+
+                    document.getElementById('add-prod-image-base64').value = dataUrl;
+                    const preview = document.getElementById('add-prod-img-preview');
+                    preview.src = dataUrl;
+                    preview.classList.remove('hidden');
+                    document.getElementById('add-prod-img-placeholder').classList.add('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // ==== LOGIKA FOTO GALERI (PERINGATAN MAKSIMAL 100 KB) ====
+        window.handleGalleryPick = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validasi Ukuran: Jika lebih dari 100 KB (102.400 bytes)
+            if (file.size > 100 * 1024) {
+                alert("Ukuran gambar melebihi batas! Maksimal ukuran gambar adalah 100 KB");
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                document.getElementById('add-prod-image-base64').value = dataUrl;
+                const preview = document.getElementById('add-prod-img-preview');
+                preview.src = dataUrl;
+                preview.classList.remove('hidden');
+                document.getElementById('add-prod-img-placeholder').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // Simpan Data Baru dari Form Lengkap
+        window.saveFullNewProduct = async function() {
+            const name = document.getElementById('add-name').value.trim();
+            const sku = document.getElementById('add-sku').value.trim();
+            const buyPrice = Number(document.getElementById('add-buyprice').value) || 0;
+            const price = Number(document.getElementById('add-price').value) || 0;
+            const stock = Number(document.getElementById('add-stock').value) || 0;
+            const category = document.getElementById('add-category').value;
+            const type = document.getElementById('add-type').value;
+            const showTransaction = document.getElementById('add-chk-transaksi').checked;
+            const useStock = document.getElementById('add-chk-pakai-stok').checked;
+            const minStock = Number(document.getElementById('add-min-stock').value) || 0;
+            const weight = Number(document.getElementById('add-weight').value) || 0;
+            const unit = document.getElementById('add-unit').value || 'pcs';
+            const discountVal = Number(document.getElementById('add-discount-val').value) || 0;
+            const rack = document.getElementById('add-rack').value.trim();
+            const notes = document.getElementById('add-notes').value.trim();
+            const image = document.getElementById('add-prod-image-base64').value;
+
+            if (!name) return alert("Nama barang wajib diisi!");
+            if (price <= 0) return alert("Harga jual wajib lebih besar dari 0!");
+
+            try {
+                await addDoc(collection(db, "products"), {
+                    name,
+                    sku,
+                    buyPrice,
+                    price,
+                    stock,
+                    category,
+                    type,
+                    showTransaction,
+                    useStock,
+                    minStock,
+                    weight,
+                    unit,
+                    discountVal,
+                    discountType: discountMode,
+                    rack,
+                    notes,
+                    image,
+                    createdAt: serverTimestamp()
+                });
+
+                alert("Barang baru berhasil disimpan!");
+                closeAddProductView();
+                loadInitialData();
+            } catch (err) {
+                console.error(err);
+                alert("Gagal menyimpan data barang ke database.");
+            }
+        };
+
+        // ==== SCANNER KAMERA ====
+        window.openScannerView = async (target) => {
+            scannerTargetMode = target || 'inventory';
+            document.getElementById('view-scanner').classList.remove('hidden');
+            const video = document.getElementById('camera-stream-video');
+
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: "environment" } }
+                });
+                video.srcObject = cameraStream;
+            } catch (err) {
+                console.warn("Kamera tidak dapat diakses langsung:", err);
+            }
+        };
+
+        window.closeScannerView = () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            document.getElementById('view-scanner').classList.add('hidden');
+        };
+
+        window.submitManualBarcode = () => {
+            const code = document.getElementById('scanner-manual-code').value.trim();
+            if (!code) return;
+            handleScannedResult(code);
+            document.getElementById('scanner-manual-code').value = '';
+        };
+
+        function handleScannedResult(code) {
+            closeScannerView();
+            if (scannerTargetMode === 'inventory') {
+                document.getElementById('inventory-search-box').value = code;
+                filterInventory(code);
+            } else if (scannerTargetMode === 'add-product') {
+                document.getElementById('add-sku').value = code;
+            } else if (scannerTargetMode === 'pos') {
+                const found = products.find(p => (p.sku && p.sku.toLowerCase() === code.toLowerCase()) || (p.name.toLowerCase() === code.toLowerCase()));
+                if (found) {
+                    addToCart(found.id);
+                } else {
+                    document.getElementById('search-box').value = code;
+                    filterProducts(code);
+                }
+            }
+        }
+
+        // ==== DAFTAR BARANG, FILTER, SORTIR & SUMMARY ====
+        window.openFilterStockModal = () => {
+            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
+            const emptyCount = products.filter(p => (Number(p.stock) || 0) <= 0).length;
+            const lowCount = products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock).length;
+            
+            document.getElementById('notif-count-empty').innerText = emptyCount.toString();
+            document.getElementById('notif-count-low').innerText = lowCount.toString();
+            document.getElementById('notif-count-all').innerText = products.length.toString();
+            
+            document.getElementById('filter-stock-modal').classList.remove('hidden');
+        };
+        window.closeFilterStockModal = () => document.getElementById('filter-stock-modal').classList.add('hidden');
+        window.applyStockFilter = (type) => {
+            closeFilterStockModal();
+            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
+            if(type === 'all') renderInventoryCards(products);
+            else if(type === 'low') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock));
+            else if(type === 'empty') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) <= 0));
+        };
+
+        window.openSortStockModal = () => document.getElementById('sort-stock-modal').classList.remove('hidden');
+        window.closeSortStockModal = () => document.getElementById('sort-stock-modal').classList.add('hidden');
+        window.applyAdvancedFilterSort = () => {
+            closeSortStockModal();
+            const direction = document.getElementById('filter-sort-direction').value;
+            const criteria = document.querySelector('input[name="sort_criteria"]:checked').value;
+
+            let sorted = [...products];
+
+            sorted.sort((a, b) => {
+                let res = 0;
+                if (criteria === 'name') {
+                    res = (a.name || '').localeCompare(b.name || '');
+                } else if (criteria === 'sku') {
+                    res = (a.sku || '').localeCompare(b.sku || '');
+                } else if (criteria === 'price') {
+                    res = (Number(a.price) || 0) - (Number(b.price) || 0);
+                } else if (criteria === 'stock') {
+                    res = (Number(a.stock) || 0) - (Number(b.stock) || 0);
+                } else if (criteria === 'latest') {
+                    const timeA = a.createdAt ? a.createdAt.seconds || 0 : 0;
+                    const timeB = b.createdAt ? b.createdAt.seconds || 0 : 0;
+                    res = timeA - timeB;
+                }
+                return direction === 'desc' ? -res : res;
+            });
+
+            renderInventoryCards(sorted);
+        };
+
         window.openProductSubView = (type) => {
-            const views = ['view-products-settings', 'view-stock-limit', 'view-db-necessity', 'view-db-summary'];
+            const views = ['view-products-settings', 'view-stock-limit', 'view-db-necessity', 'view-db-summary', 'view-add-product'];
             views.forEach(v => document.getElementById(v).classList.add('hidden'));
 
             if (type === 'settings') {
@@ -590,7 +1070,7 @@
         };
 
         window.closeProductSubView = () => {
-            const views = ['view-products-settings', 'view-stock-limit', 'view-db-necessity', 'view-db-summary'];
+            const views = ['view-products-settings', 'view-stock-limit', 'view-db-necessity', 'view-db-summary', 'view-add-product'];
             views.forEach(v => document.getElementById(v).classList.add('hidden'));
             document.getElementById('view-products').classList.remove('hidden');
         };
@@ -637,106 +1117,6 @@
             }
         }
 
-        // ==== POPUP NOTIFIKASI STOK (CORONG) ====
-        window.openFilterStockModal = () => {
-            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
-            const emptyCount = products.filter(p => (Number(p.stock) || 0) <= 0).length;
-            const lowCount = products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock).length;
-            
-            document.getElementById('notif-count-empty').innerText = emptyCount.toString();
-            document.getElementById('notif-count-low').innerText = lowCount.toString();
-            document.getElementById('notif-count-all').innerText = products.length.toString();
-            
-            document.getElementById('filter-stock-modal').classList.remove('hidden');
-        };
-        window.closeFilterStockModal = () => document.getElementById('filter-stock-modal').classList.add('hidden');
-        window.applyStockFilter = (type) => {
-            closeFilterStockModal();
-            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
-            if(type === 'all') renderInventoryCards(products);
-            else if(type === 'low') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock));
-            else if(type === 'empty') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) <= 0));
-        };
-
-        // ==== POPUP FILTER SORTIR ====
-        window.openSortStockModal = () => document.getElementById('sort-stock-modal').classList.remove('hidden');
-        window.closeSortStockModal = () => document.getElementById('sort-stock-modal').classList.add('hidden');
-        window.applyAdvancedFilterSort = () => {
-            closeSortStockModal();
-            const direction = document.getElementById('filter-sort-direction').value;
-            const criteria = document.querySelector('input[name="sort_criteria"]:checked').value;
-
-            let sorted = [...products];
-
-            sorted.sort((a, b) => {
-                let res = 0;
-                if (criteria === 'name') {
-                    res = (a.name || '').localeCompare(b.name || '');
-                } else if (criteria === 'sku') {
-                    res = (a.sku || '').localeCompare(b.sku || '');
-                } else if (criteria === 'price') {
-                    res = (Number(a.price) || 0) - (Number(b.price) || 0);
-                } else if (criteria === 'stock') {
-                    res = (Number(a.stock) || 0) - (Number(b.stock) || 0);
-                } else if (criteria === 'latest') {
-                    const timeA = a.createdAt ? a.createdAt.seconds || 0 : 0;
-                    const timeB = b.createdAt ? b.createdAt.seconds || 0 : 0;
-                    res = timeA - timeB;
-                }
-                return direction === 'desc' ? -res : res;
-            });
-
-            renderInventoryCards(sorted);
-        };
-
-        // ==== SCANNER KAMERA ANDROID ====
-        window.openScannerView = async (target) => {
-            scannerTargetMode = target || 'inventory';
-            document.getElementById('view-scanner').classList.remove('hidden');
-            const video = document.getElementById('camera-stream-video');
-
-            try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: { ideal: "environment" } }
-                });
-                video.srcObject = cameraStream;
-            } catch (err) {
-                console.warn("Kamera tidak dapat diakses langsung:", err);
-            }
-        };
-
-        window.closeScannerView = () => {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
-            document.getElementById('view-scanner').classList.add('hidden');
-        };
-
-        window.submitManualBarcode = () => {
-            const code = document.getElementById('scanner-manual-code').value.trim();
-            if (!code) return;
-            handleScannedResult(code);
-            document.getElementById('scanner-manual-code').value = '';
-        };
-
-        function handleScannedResult(code) {
-            closeScannerView();
-            if (scannerTargetMode === 'inventory') {
-                document.getElementById('inventory-search-box').value = code;
-                filterInventory(code);
-            } else if (scannerTargetMode === 'pos') {
-                const found = products.find(p => (p.sku && p.sku.toLowerCase() === code.toLowerCase()) || (p.name.toLowerCase() === code.toLowerCase()));
-                if (found) {
-                    addToCart(found.id);
-                } else {
-                    document.getElementById('search-box').value = code;
-                    filterProducts(code);
-                }
-            }
-        }
-
-        // ==== MODUL DAFTAR BARANG ====
         window.toggleProductMenu = () => document.getElementById('product-dropdown-menu').classList.toggle('hidden');
 
         function renderInventoryCards(list) {
@@ -769,8 +1149,8 @@
                 container.innerHTML += `
                     <div onclick="editProduct('${p.id}')" class="p-3.5 bg-white flex items-center justify-between hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition">
                         <div class="flex items-center space-x-3 flex-1 min-w-0 pr-3">
-                            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-base flex-shrink-0 shadow-inner">
-                                ${initials}
+                            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-base flex-shrink-0 shadow-inner overflow-hidden">
+                                ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover">` : initials}
                             </div>
                             <div class="min-w-0 flex-1">
                                 <h4 class="font-bold text-sm text-gray-800 truncate">${p.name}</h4>
@@ -840,7 +1220,7 @@
         };
         window.toggleCartMobile = () => document.getElementById('cart-panel').classList.toggle('translate-x-full');
 
-        // CRUD Barang
+        // CRUD Singkat
         window.editProduct = function(id) {
             const p = products.find(x => x.id === id);
             if(!p) return;
@@ -883,22 +1263,7 @@
             link.click();
         };
 
-        window.openAddProductModal = () => document.getElementById('product-modal').classList.remove('hidden');
-        window.closeAddProductModal = () => document.getElementById('product-modal').classList.add('hidden');
-        window.saveNewProduct = async function() {
-            const n = document.getElementById('input-name').value;
-            const sku = document.getElementById('input-sku').value || '';
-            const cat = document.getElementById('input-category').value || 'Umum';
-            const bp = Number(document.getElementById('input-buyprice').value)||0;
-            const p = Number(document.getElementById('input-price').value);
-            const s = Number(document.getElementById('input-stock').value);
-            if (!n || !p) return alert("Data belum lengkap!");
-            await addDoc(collection(db, "products"), { name:n, sku:sku, category:cat, buyPrice:bp, price:p, stock:s, createdAt: serverTimestamp() });
-            closeAddProductModal();
-            loadInitialData();
-        };
-
-        // Render Kasir & Keranjang
+        // Render Kasir POS
         function renderProducts(list) {
             const grid = document.getElementById('product-grid'); grid.innerHTML = '';
             list.forEach(p => {
