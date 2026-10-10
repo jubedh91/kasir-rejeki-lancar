@@ -38,8 +38,8 @@
     <!-- App Container -->
     <div id="app" class="flex flex-col h-screen overflow-hidden">
         
-        <!-- HEADER -->
-        <header class="bg-emerald-700 text-white shadow-md z-10 flex items-center justify-between px-4 py-3">
+        <!-- HEADER UTAMA (HANYA AKTIF DI POS/HOME) -->
+        <header id="main-header" class="bg-emerald-700 text-white shadow-md z-10 flex items-center justify-between px-4 py-3">
             <div class="flex items-center space-x-3">
                 <button onclick="toggleSidebar()" class="text-white text-xl focus:outline-none hover:text-emerald-200 transition"><i class="fa-solid fa-bars"></i></button>
                 <h1 id="app-title" class="text-lg font-bold tracking-wide truncate">Kasir (POS)</h1>
@@ -153,17 +153,14 @@
                     </div>
                 </div>
 
-                <!-- Bilah Kontrol Pencarian, Filter Corong & Sortir (SS 1000918551) -->
+                <!-- Bilah Kontrol Pencarian, Filter Corong & Sortir -->
                 <div class="p-3 bg-white border-b flex items-center space-x-2">
-                    <!-- Ikon Corong (Popup Notifikasi Stok) -->
                     <button onclick="openFilterStockModal()" class="text-emerald-600 text-xl px-2 py-1 hover:text-emerald-700 transition"><i class="fa-solid fa-filter"></i></button>
-                    <!-- Ikon Panah Naik & Garis (Popup Filter Sortir) -->
                     <button onclick="openSortStockModal()" class="text-emerald-600 text-xl px-2 py-1 hover:text-emerald-700 transition"><i class="fa-solid fa-arrow-down-short-wide"></i></button>
                     <div class="relative flex-1">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fa-solid fa-search text-sm"></i></span>
                         <input type="text" id="inventory-search-box" oninput="filterInventory(this.value)" placeholder="Cari nama atau kode barang" class="w-full pl-9 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-gray-50 border-gray-200">
                     </div>
-                    <!-- Ikon Barcode: Langsung Mengarahkan ke Kamera Scan Android -->
                     <button onclick="openScannerView('inventory')" class="text-emerald-700 text-xl px-2 hover:text-emerald-800 transition" title="Scan Kamera Barcode"><i class="fa-solid fa-barcode"></i></button>
                 </div>
 
@@ -181,9 +178,8 @@
                 </div>
             </div>
 
-            <!-- === 2A. SUB-LAYAR SCAN BARCODE / QR CODE KAMERA (PERSIS SS 1000918605) === -->
+            <!-- === 2A. SUB-LAYAR SCAN BARCODE / QR CODE KAMERA === -->
             <div id="view-scanner" class="fixed inset-0 bg-black z-50 hidden flex flex-col">
-                <!-- Header Scanner -->
                 <div class="px-4 py-3 bg-black/80 text-white flex items-center justify-between z-20">
                     <div class="flex items-center space-x-4">
                         <button onclick="closeScannerView()" class="text-xl font-bold hover:text-emerald-400"><i class="fa-solid fa-arrow-left"></i></button>
@@ -192,7 +188,6 @@
                     <button class="text-lg px-2"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                 </div>
 
-                <!-- Balon Petunjuk Hijau (Speech Bubble) -->
                 <div class="px-4 pt-3 pb-2 z-20 flex justify-center">
                     <div class="relative bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs px-4 py-2.5 rounded-2xl shadow-md max-w-sm text-left">
                         Apabila terdapat kesulitan silahkan Scan di atas garis merah atau mencoba Scan Mode A
@@ -200,27 +195,18 @@
                     </div>
                 </div>
 
-                <!-- Viewfinder Kamera & Laser Scanner -->
                 <div class="flex-1 relative flex items-center justify-center overflow-hidden">
                     <video id="camera-stream-video" autoplay playsinline muted class="absolute inset-0 w-full h-full object-cover"></video>
                     
-                    <!-- Kotak Target Putih (Corner Brackets) -->
                     <div class="relative w-64 h-64 z-10 pointer-events-none">
-                        <!-- Sudut Kiri Atas -->
                         <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
-                        <!-- Sudut Kanan Atas -->
                         <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
-                        <!-- Sudut Kiri Bawah -->
                         <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
-                        <!-- Sudut Kanan Bawah -->
                         <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg"></div>
-                        
-                        <!-- Garis Merah Laser Animasi -->
                         <div class="absolute left-2 right-2 h-0.5 bg-red-500 shadow-md shadow-red-500/80 laser-line"></div>
                     </div>
                 </div>
 
-                <!-- Kontrol Manual Input di Bawah -->
                 <div class="p-4 bg-black/90 text-center z-20 space-y-2">
                     <p class="text-[11px] text-gray-400">Arahkan kamera ke kode barcode produk</p>
                     <div class="flex space-x-2 max-w-sm mx-auto">
@@ -230,13 +216,12 @@
                 </div>
             </div>
 
-            <!-- === 2B. POPUP NOTIFIKASI STOK (PERSIS SS 1000918603) === -->
+            <!-- === 2B. POPUP NOTIFIKASI STOK === -->
             <div id="filter-stock-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
                     <h3 class="font-extrabold text-gray-800 text-base mb-6 tracking-wide">NOTIFIKASI</h3>
                     
                     <div class="space-y-3.5 text-sm font-semibold">
-                        <!-- Stok Habis (Titik Merah) -->
                         <button onclick="applyStockFilter('empty')" class="w-full flex items-center justify-between p-3.5 rounded-full border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition">
                             <div class="flex items-center space-x-3">
                                 <span class="w-3.5 h-3.5 rounded-full bg-red-500 flex-shrink-0"></span>
@@ -245,7 +230,6 @@
                             <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
                         </button>
 
-                        <!-- Stok Menipis (Titik Kuning) -->
                         <button onclick="applyStockFilter('low')" class="w-full flex items-center justify-between p-3.5 rounded-full border border-gray-200 hover:border-yellow-400 hover:bg-yellow-50/50 transition">
                             <div class="flex items-center space-x-3">
                                 <span class="w-3.5 h-3.5 rounded-full bg-yellow-400 flex-shrink-0"></span>
@@ -254,7 +238,6 @@
                             <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
                         </button>
 
-                        <!-- Semua Stok (Titik Abu-abu / Hijau Aktif) -->
                         <button onclick="applyStockFilter('all')" id="notif-btn-all" class="w-full flex items-center justify-between p-3.5 rounded-full border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 transition">
                             <div class="flex items-center space-x-3">
                                 <span class="w-3.5 h-3.5 rounded-full bg-gray-300 flex-shrink-0"></span>
@@ -264,20 +247,18 @@
                         </button>
                     </div>
 
-                    <!-- Tombol TUTUP -->
                     <button onclick="closeFilterStockModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3.5 rounded-full font-bold text-sm mt-6 transition">
                         TUTUP
                     </button>
                 </div>
             </div>
 
-            <!-- === 2C. POPUP FILTER & SORTIR (PERSIS SS 1000918604) === -->
+            <!-- === 2C. POPUP FILTER & SORTIR === -->
             <div id="sort-stock-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6">
                     <h3 class="font-extrabold text-gray-800 text-base mb-4 tracking-wide text-center">FILTER</h3>
                     
                     <div class="space-y-4">
-                        <!-- Pilihan Urutan -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-1.5">Urutan</label>
                             <div class="relative">
@@ -291,7 +272,6 @@
                             </div>
                         </div>
 
-                        <!-- Sortir Berdasarkan -->
                         <div>
                             <label class="block text-xs font-bold text-gray-700 mb-2">Sortir Berdasarkan</label>
                             <div class="space-y-3.5 text-sm text-gray-800 font-medium">
@@ -319,7 +299,6 @@
                         </div>
                     </div>
 
-                    <!-- Tombol BATAL dan TERAPKAN -->
                     <div class="grid grid-cols-2 gap-3 mt-6">
                         <button onclick="closeSortStockModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-3.5 rounded-full font-bold text-sm transition">
                             BATAL
@@ -521,7 +500,7 @@
     </div>
 
     <!-- Floating Cart Mobile -->
-    <div class="md:hidden fixed bottom-4 right-4 z-40" id="floating-cart-btn"><button onclick="toggleCartMobile()" class="bg-emerald-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl relative active:scale-90 transition"><i class="fa-solid fa-cart-shopping"></i><span id="mobile-cart-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span></button></div>
+    <div id="floating-cart-btn" class="md:hidden fixed bottom-4 right-4 z-40"><button onclick="toggleCartMobile()" class="bg-emerald-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl relative active:scale-90 transition"><i class="fa-solid fa-cart-shopping"></i><span id="mobile-cart-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span></button></div>
 
     <!-- Firebase Script -->
     <script type="module">
@@ -546,104 +525,46 @@
         let cameraStream = null;
         let scannerTargetMode = 'inventory';
 
-        // ==== 1. MODUL POPUP NOTIFIKASI STOK (SS 1000918603) ====
-        window.openFilterStockModal = () => {
-            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
-            const emptyCount = products.filter(p => (Number(p.stock) || 0) <= 0).length;
-            const lowCount = products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock).length;
-            
-            document.getElementById('notif-count-empty').innerText = emptyCount.toString();
-            document.getElementById('notif-count-low').innerText = lowCount.toString();
-            document.getElementById('notif-count-all').innerText = products.length.toString();
-            
-            document.getElementById('filter-stock-modal').classList.remove('hidden');
-        };
-        window.closeFilterStockModal = () => document.getElementById('filter-stock-modal').classList.add('hidden');
-        window.applyStockFilter = (type) => {
-            closeFilterStockModal();
-            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
-            if(type === 'all') renderInventoryCards(products);
-            else if(type === 'low') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock));
-            else if(type === 'empty') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) <= 0));
-        };
-
-        // ==== 2. MODUL POPUP FILTER SORTIR (SS 1000918604) ====
-        window.openSortStockModal = () => document.getElementById('sort-stock-modal').classList.remove('hidden');
-        window.closeSortStockModal = () => document.getElementById('sort-stock-modal').classList.add('hidden');
-        window.applyAdvancedFilterSort = () => {
-            closeSortStockModal();
-            const direction = document.getElementById('filter-sort-direction').value; // 'desc' atau 'asc'
-            const criteria = document.querySelector('input[name="sort_criteria"]:checked').value;
-
-            let sorted = [...products];
-
-            sorted.sort((a, b) => {
-                let res = 0;
-                if (criteria === 'name') {
-                    res = (a.name || '').localeCompare(b.name || '');
-                } else if (criteria === 'sku') {
-                    res = (a.sku || '').localeCompare(b.sku || '');
-                } else if (criteria === 'price') {
-                    res = (Number(a.price) || 0) - (Number(b.price) || 0);
-                } else if (criteria === 'stock') {
-                    res = (Number(a.stock) || 0) - (Number(b.stock) || 0);
-                } else if (criteria === 'latest') {
-                    const timeA = a.createdAt ? a.createdAt.seconds || 0 : 0;
-                    const timeB = b.createdAt ? b.createdAt.seconds || 0 : 0;
-                    res = timeA - timeB;
-                }
-                return direction === 'desc' ? -res : res;
+        // ==== SISTEM NAVIGASI & KONTROL VIEW PANEL RESMI (MEMPERBAIKI BUG SPLIT SCREEN) ====
+        window.switchView = function(viewName) {
+            // Sembunyikan SELURUH panel tampilan
+            document.querySelectorAll('.view-panel').forEach(panel => {
+                panel.classList.add('hidden');
             });
 
-            renderInventoryCards(sorted);
-        };
+            const mainHeader = document.getElementById('main-header');
+            const floatingCart = document.getElementById('floating-cart-btn');
 
-        // ==== 3. MODUL SCANNER KAMERA ANDROID (SS 1000918605) ====
-        window.openScannerView = async (target) => {
-            scannerTargetMode = target || 'inventory';
-            document.getElementById('view-scanner').classList.remove('hidden');
-            const video = document.getElementById('camera-stream-video');
+            if (viewName === 'pos') {
+                document.getElementById('view-pos').classList.remove('hidden');
+                if (mainHeader) mainHeader.classList.remove('hidden');
+                if (floatingCart) floatingCart.style.display = 'block';
+            } else if (viewName === 'products') {
+                document.getElementById('view-products').classList.remove('hidden');
+                if (mainHeader) mainHeader.classList.add('hidden');
+                if (floatingCart) floatingCart.style.display = 'none';
+                renderInventoryCards(products); 
+                renderInventoryCategories();
+            } else {
+                const targetView = document.getElementById(`view-${viewName}`) || document.getElementById(viewName);
+                if (targetView) targetView.classList.remove('hidden');
+                if (mainHeader) mainHeader.classList.add('hidden');
+                if (floatingCart) floatingCart.style.display = 'none';
+            }
 
-            try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: { ideal: "environment" } }
+            // Update Nav Aktif di Drawer
+            const activeNav = document.getElementById(`nav-${viewName}`);
+            if (activeNav) {
+                document.querySelectorAll('#sidebar nav a').forEach(a => {
+                    a.className = "flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition";
                 });
-                video.srcObject = cameraStream;
-            } catch (err) {
-                console.warn("Kamera tidak dapat diakses langsung:", err);
+                activeNav.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium transition shadow-sm border border-emerald-100";
+            }
+
+            if (window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) {
+                toggleSidebar();
             }
         };
-
-        window.closeScannerView = () => {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
-            }
-            document.getElementById('view-scanner').classList.add('hidden');
-        };
-
-        window.submitManualBarcode = () => {
-            const code = document.getElementById('scanner-manual-code').value.trim();
-            if (!code) return;
-            handleScannedResult(code);
-            document.getElementById('scanner-manual-code').value = '';
-        };
-
-        function handleScannedResult(code) {
-            closeScannerView();
-            if (scannerTargetMode === 'inventory') {
-                document.getElementById('inventory-search-box').value = code;
-                filterInventory(code);
-            } else if (scannerTargetMode === 'pos') {
-                const found = products.find(p => (p.sku && p.sku.toLowerCase() === code.toLowerCase()) || (p.name.toLowerCase() === code.toLowerCase()));
-                if (found) {
-                    addToCart(found.id);
-                } else {
-                    document.getElementById('search-box').value = code;
-                    filterProducts(code);
-                }
-            }
-        }
 
         // ==== MODUL SUB-LAYAR PENGATURAN & RINCIAN BARANG ====
         window.openProductSubView = (type) => {
@@ -713,6 +634,105 @@
                 document.getElementById('db-summary-asset-count').innerText = `Rp ${totalAsset.toLocaleString('id-ID')}`;
             } else {
                 assetContainer.classList.add('hidden');
+            }
+        }
+
+        // ==== POPUP NOTIFIKASI STOK (CORONG) ====
+        window.openFilterStockModal = () => {
+            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
+            const emptyCount = products.filter(p => (Number(p.stock) || 0) <= 0).length;
+            const lowCount = products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock).length;
+            
+            document.getElementById('notif-count-empty').innerText = emptyCount.toString();
+            document.getElementById('notif-count-low').innerText = lowCount.toString();
+            document.getElementById('notif-count-all').innerText = products.length.toString();
+            
+            document.getElementById('filter-stock-modal').classList.remove('hidden');
+        };
+        window.closeFilterStockModal = () => document.getElementById('filter-stock-modal').classList.add('hidden');
+        window.applyStockFilter = (type) => {
+            closeFilterStockModal();
+            const minStock = Number(localStorage.getItem('toko_min_stock')) || 20;
+            if(type === 'all') renderInventoryCards(products);
+            else if(type === 'low') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= minStock));
+            else if(type === 'empty') renderInventoryCards(products.filter(p => (Number(p.stock) || 0) <= 0));
+        };
+
+        // ==== POPUP FILTER SORTIR ====
+        window.openSortStockModal = () => document.getElementById('sort-stock-modal').classList.remove('hidden');
+        window.closeSortStockModal = () => document.getElementById('sort-stock-modal').classList.add('hidden');
+        window.applyAdvancedFilterSort = () => {
+            closeSortStockModal();
+            const direction = document.getElementById('filter-sort-direction').value;
+            const criteria = document.querySelector('input[name="sort_criteria"]:checked').value;
+
+            let sorted = [...products];
+
+            sorted.sort((a, b) => {
+                let res = 0;
+                if (criteria === 'name') {
+                    res = (a.name || '').localeCompare(b.name || '');
+                } else if (criteria === 'sku') {
+                    res = (a.sku || '').localeCompare(b.sku || '');
+                } else if (criteria === 'price') {
+                    res = (Number(a.price) || 0) - (Number(b.price) || 0);
+                } else if (criteria === 'stock') {
+                    res = (Number(a.stock) || 0) - (Number(b.stock) || 0);
+                } else if (criteria === 'latest') {
+                    const timeA = a.createdAt ? a.createdAt.seconds || 0 : 0;
+                    const timeB = b.createdAt ? b.createdAt.seconds || 0 : 0;
+                    res = timeA - timeB;
+                }
+                return direction === 'desc' ? -res : res;
+            });
+
+            renderInventoryCards(sorted);
+        };
+
+        // ==== SCANNER KAMERA ANDROID ====
+        window.openScannerView = async (target) => {
+            scannerTargetMode = target || 'inventory';
+            document.getElementById('view-scanner').classList.remove('hidden');
+            const video = document.getElementById('camera-stream-video');
+
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: "environment" } }
+                });
+                video.srcObject = cameraStream;
+            } catch (err) {
+                console.warn("Kamera tidak dapat diakses langsung:", err);
+            }
+        };
+
+        window.closeScannerView = () => {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            document.getElementById('view-scanner').classList.add('hidden');
+        };
+
+        window.submitManualBarcode = () => {
+            const code = document.getElementById('scanner-manual-code').value.trim();
+            if (!code) return;
+            handleScannedResult(code);
+            document.getElementById('scanner-manual-code').value = '';
+        };
+
+        function handleScannedResult(code) {
+            closeScannerView();
+            if (scannerTargetMode === 'inventory') {
+                document.getElementById('inventory-search-box').value = code;
+                filterInventory(code);
+            } else if (scannerTargetMode === 'pos') {
+                const found = products.find(p => (p.sku && p.sku.toLowerCase() === code.toLowerCase()) || (p.name.toLowerCase() === code.toLowerCase()));
+                if (found) {
+                    addToCart(found.id);
+                } else {
+                    document.getElementById('search-box').value = code;
+                    filterProducts(code);
+                }
             }
         }
 
@@ -814,26 +834,6 @@
             }
         };
 
-        window.switchView = function(viewName) {
-            const allViews = ['pos','products','view-products-settings','view-stock-limit','view-db-necessity','view-db-summary'];
-            allViews.forEach(v => {
-                const p = document.getElementById(v);
-                if (p) p.classList.add('hidden');
-            });
-            const activeNav = document.getElementById(`nav-${viewName}`);
-            if(activeNav) activeNav.className = "flex items-center space-x-3 p-3 rounded-lg bg-emerald-50 text-emerald-700 font-medium transition shadow-sm border border-emerald-100";
-            
-            if (viewName === 'products') {
-                document.getElementById('view-products').classList.remove('hidden');
-                renderInventoryCards(products); 
-                renderInventoryCategories();
-            } else if (viewName === 'pos') {
-                document.getElementById('view-pos').classList.remove('hidden');
-            }
-            document.getElementById('floating-cart-btn').style.display = (viewName === 'pos') ? 'block' : 'none';
-            if(window.innerWidth < 768 && !document.getElementById('sidebar').classList.contains('-translate-x-full')) toggleSidebar();
-        };
-
         window.toggleSidebar = () => {
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
             document.getElementById('sidebar-overlay').classList.toggle('hidden');
@@ -870,7 +870,6 @@
                 loadInitialData();
             } catch(e) { alert("Gagal update data."); }
         };
-
         window.exportProductsCSV = function() {
             if(products.length === 0) return alert('Kosong');
             let csvContent = "Kode SKU,Kategori,Nama Barang,Harga Modal,Harga Jual,Stok Saat Ini\n";
